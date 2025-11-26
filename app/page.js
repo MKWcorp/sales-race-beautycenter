@@ -40,6 +40,41 @@ const getMonthlyTarget = (name) => MONTHLY_TARGETS[name] || 50000000;
 const getPIC = (name) => PIC_DATA[name] || "TBD";
 const getRemainingDays = () => Math.max(0, Math.ceil((PROGRAM_END - new Date()) / 86400000));
 
+// Format Rupiah dengan sensor 2 digit pertama jadi XX
+const formatRupiah = (amount) => {
+  if (!amount || amount === 0) return '0';
+  
+  // Konversi ke string tanpa format dulu untuk hitung digit
+  const numStr = amount.toString();
+  
+  // Kalau cuma 1 digit (0-9), return X
+  if (numStr.length === 1) return 'X';
+  
+  // Format dengan thousand separator
+  const formatted = amount.toLocaleString('id-ID');
+  
+  // Replace 2 digit pertama dengan XX (skip separator titik)
+  // Contoh: 12.345.678 -> XX.345.678
+  //         1.234.567 -> XX.234.567
+  let digitCount = 0;
+  let result = '';
+  
+  for (let i = 0; i < formatted.length; i++) {
+    if (formatted[i] >= '0' && formatted[i] <= '9') {
+      if (digitCount < 2) {
+        result += 'X';
+        digitCount++;
+      } else {
+        result += formatted[i];
+      }
+    } else {
+      result += formatted[i]; // Keep separator (.)
+    }
+  }
+  
+  return result;
+};
+
 // Row Component
 const RaceRow = ({ rank, data, maxTotal }) => {
   const target = getDailyTarget(data.name);
@@ -51,7 +86,7 @@ const RaceRow = ({ rank, data, maxTotal }) => {
   const weeklyThreshold = weeklyTarget;
   const monthlyThreshold = monthlyTarget;
   
-  const percent = maxTotal > 0 ? Math.min((data.total / maxTotal) * 100, 100) : 0;
+  const percent = maxTotal > 0 ? Math.min((data.monthlyTotal / maxTotal) * 100, 100) : 0;
   const dailyAchievement = target > 0 ? Math.round((data.total / target) * 100) : 0;
   const weeklyAchievement = weeklyTarget > 0 ? Math.round((data.weeklyTotal / weeklyTarget) * 100) : 0;
   const monthlyAchievement = monthlyTarget > 0 ? Math.round((data.monthlyTotal / monthlyTarget) * 100) : 0;
@@ -61,8 +96,31 @@ const RaceRow = ({ rank, data, maxTotal }) => {
   const isWeeklyOnTarget = weeklyAchievement >= 70;
   const isMonthlyOnTarget = monthlyAchievement >= 70;
   
-  // Hijau jika salah satu target 70% tercapai, merah jika semua belum tercapai
-  const isOnTarget = isDailyOnTarget || isWeeklyOnTarget || isMonthlyOnTarget;
+  // Status bar color priority: Monthly > Weekly > Daily
+  // Green: >=80%, Yellow: 70-79%, Red: <70%
+  let barColor = 'red'; // default
+  
+  // Priority 1: Check Monthly (highest priority)
+  if (monthlyAchievement >= 80) {
+    barColor = 'green';
+  } else if (monthlyAchievement >= 70) {
+    barColor = 'yellow';
+  }
+  // Priority 2: Check Weekly (if monthly not hit 70%)
+  else if (weeklyAchievement >= 80) {
+    barColor = 'green';
+  } else if (weeklyAchievement >= 70) {
+    barColor = 'yellow';
+  }
+  // Priority 3: Check Daily (if both monthly and weekly not hit 70%)
+  else if (dailyAchievement >= 80) {
+    barColor = 'green';
+  } else if (dailyAchievement >= 70) {
+    barColor = 'yellow';
+  }
+  // else: stays red
+  
+  const isOnTarget = barColor !== 'red'; // For ring border (green/yellow vs red)
   const pic = getPIC(data.name);
 
   const getRankStyle = () => {
@@ -82,17 +140,25 @@ const RaceRow = ({ rank, data, maxTotal }) => {
 
       {/* Main Bar - Full Width */}
       <div className={`flex-1 h-20 rounded-lg relative overflow-hidden flex items-center px-4 transition-all duration-300
-        ${isOnTarget ? 'bg-gradient-to-r from-slate-800 to-slate-900 ring-2 ring-green-500/70 shadow-lg shadow-green-500/20' : 'bg-gradient-to-r from-slate-800 to-slate-900 ring-2 ring-red-500/70 shadow-lg shadow-red-500/20'}`}>
+        ${barColor === 'green' ? 'bg-gradient-to-r from-slate-800 to-slate-900 ring-2 ring-green-500/70 shadow-lg shadow-green-500/20' : 
+          barColor === 'yellow' ? 'bg-gradient-to-r from-slate-800 to-slate-900 ring-2 ring-yellow-500/70 shadow-lg shadow-yellow-500/20' :
+          'bg-gradient-to-r from-slate-800 to-slate-900 ring-2 ring-red-500/70 shadow-lg shadow-red-500/20'}`}>
         
         {/* Animated Fill */}
         <div 
-          className={`absolute inset-y-0 left-0 transition-all duration-1000 ease-out ${isOnTarget ? 'bg-gradient-to-r from-green-600/40 via-green-500/30 to-green-600/20' : 'bg-gradient-to-r from-red-600/40 via-red-500/30 to-red-600/20'}`}
+          className={`absolute inset-y-0 left-0 transition-all duration-1000 ease-out 
+            ${barColor === 'green' ? 'bg-gradient-to-r from-green-600/40 via-green-500/30 to-green-600/20' : 
+              barColor === 'yellow' ? 'bg-gradient-to-r from-yellow-600/40 via-yellow-500/30 to-yellow-600/20' :
+              'bg-gradient-to-r from-red-600/40 via-red-500/30 to-red-600/20'}`}
           style={{ width: `${percent}%` }}
         />
         
         {/* Glowing Bottom Accent */}
         <div 
-          className={`absolute bottom-0 left-0 h-2 transition-all duration-1000 ease-out ${isOnTarget ? 'bg-gradient-to-r from-green-400 to-green-600 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-gradient-to-r from-red-400 to-red-600 shadow-[0_0_10px_rgba(239,68,68,0.5)]'}`}
+          className={`absolute bottom-0 left-0 h-2 transition-all duration-1000 ease-out 
+            ${barColor === 'green' ? 'bg-gradient-to-r from-green-400 to-green-600 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 
+              barColor === 'yellow' ? 'bg-gradient-to-r from-yellow-400 to-yellow-600 shadow-[0_0_10px_rgba(234,179,8,0.5)]' :
+              'bg-gradient-to-r from-red-400 to-red-600 shadow-[0_0_10px_rgba(239,68,68,0.5)]'}`}
           style={{ width: `${percent}%` }}
         />
 
@@ -107,17 +173,23 @@ const RaceRow = ({ rank, data, maxTotal }) => {
           {/* Daily Target */}
           <div className="flex flex-col items-center shrink-0 w-[200px]">
             <div className="flex items-center gap-2">
-              {isDailyOnTarget ? (
-                <CheckCircle className="w-5 h-5 text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
+              {dailyAchievement >= 80 ? (
+                <span className="text-2xl drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]">👍</span>
+              ) : dailyAchievement >= 70 ? (
+                <CheckCircle className="w-5 h-5 text-yellow-400 drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]" />
               ) : (
                 <Skull className="w-5 h-5 text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
               )}
               <div className="text-right">
-                <p className={`text-sm font-bold leading-tight ${isDailyOnTarget ? 'text-green-400' : 'text-red-400'}`}>
-                  {data.total.toLocaleString('id-ID')}
+                <p className={`text-sm font-bold leading-tight ${
+                  dailyAchievement >= 80 ? 'text-green-400' : 
+                  dailyAchievement >= 70 ? 'text-yellow-400' : 
+                  'text-red-400'
+                }`}>
+                  {formatRupiah(data.total)}
                 </p>
                 <p className="text-[10px] text-slate-500 leading-tight">
-                  /{dailyThreshold.toLocaleString('id-ID')}
+                  /{formatRupiah(dailyThreshold)}
                 </p>
               </div>
             </div>
@@ -126,13 +198,13 @@ const RaceRow = ({ rank, data, maxTotal }) => {
               <div className="flex items-center gap-1">
                 <ShoppingBag className="w-3 h-3 text-blue-400" />
                 <span className="text-[9px] text-blue-400 font-bold">
-                  {(data.productTotal || 0).toLocaleString('id-ID')}
+                  {formatRupiah(data.productTotal || 0)}
                 </span>
               </div>
               <div className="flex items-center gap-1">
                 <Sparkles className="w-3 h-3 text-purple-400" />
                 <span className="text-[9px] text-purple-400 font-bold">
-                  {(data.treatmentTotal || 0).toLocaleString('id-ID')}
+                  {formatRupiah(data.treatmentTotal || 0)}
                 </span>
               </div>
             </div>
@@ -142,17 +214,23 @@ const RaceRow = ({ rank, data, maxTotal }) => {
           {/* Weekly Target */}
           <div className="flex flex-col items-center shrink-0 w-[200px]">
             <div className="flex items-center gap-2">
-              {isWeeklyOnTarget ? (
-                <CheckCircle className="w-5 h-5 text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
+              {weeklyAchievement >= 80 ? (
+                <span className="text-2xl drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]">👍</span>
+              ) : weeklyAchievement >= 70 ? (
+                <CheckCircle className="w-5 h-5 text-yellow-400 drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]" />
               ) : (
                 <Skull className="w-5 h-5 text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
               )}
               <div className="text-right">
-                <p className={`text-sm font-bold leading-tight ${isWeeklyOnTarget ? 'text-green-400' : 'text-red-400'}`}>
-                  {data.weeklyTotal.toLocaleString('id-ID')}
+                <p className={`text-sm font-bold leading-tight ${
+                  weeklyAchievement >= 80 ? 'text-green-400' : 
+                  weeklyAchievement >= 70 ? 'text-yellow-400' : 
+                  'text-red-400'
+                }`}>
+                  {formatRupiah(data.weeklyTotal)}
                 </p>
                 <p className="text-[10px] text-slate-500 leading-tight">
-                  /{weeklyThreshold.toLocaleString('id-ID')}
+                  /{formatRupiah(weeklyThreshold)}
                 </p>
               </div>
             </div>
@@ -161,13 +239,13 @@ const RaceRow = ({ rank, data, maxTotal }) => {
               <div className="flex items-center gap-1">
                 <ShoppingBag className="w-3 h-3 text-blue-400" />
                 <span className="text-[9px] text-blue-400 font-bold">
-                  {(data.weeklyProductTotal || 0).toLocaleString('id-ID')}
+                  {formatRupiah(data.weeklyProductTotal || 0)}
                 </span>
               </div>
               <div className="flex items-center gap-1">
                 <Sparkles className="w-3 h-3 text-purple-400" />
                 <span className="text-[9px] text-purple-400 font-bold">
-                  {(data.weeklyTreatmentTotal || 0).toLocaleString('id-ID')}
+                  {formatRupiah(data.weeklyTreatmentTotal || 0)}
                 </span>
               </div>
             </div>
@@ -177,17 +255,23 @@ const RaceRow = ({ rank, data, maxTotal }) => {
           {/* Monthly Target */}
           <div className="flex flex-col items-center shrink-0 w-[200px]">
             <div className="flex items-center gap-2">
-              {isMonthlyOnTarget ? (
-                <CheckCircle className="w-5 h-5 text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
+              {monthlyAchievement >= 80 ? (
+                <span className="text-2xl drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]">👍</span>
+              ) : monthlyAchievement >= 70 ? (
+                <CheckCircle className="w-5 h-5 text-yellow-400 drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]" />
               ) : (
                 <Skull className="w-5 h-5 text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
               )}
               <div className="text-right">
-                <p className={`text-sm font-bold leading-tight ${isMonthlyOnTarget ? 'text-green-400' : 'text-red-400'}`}>
-                  {data.monthlyTotal.toLocaleString('id-ID')}
+                <p className={`text-sm font-bold leading-tight ${
+                  monthlyAchievement >= 80 ? 'text-green-400' : 
+                  monthlyAchievement >= 70 ? 'text-yellow-400' : 
+                  'text-red-400'
+                }`}>
+                  {formatRupiah(data.monthlyTotal)}
                 </p>
                 <p className="text-[10px] text-slate-500 leading-tight">
-                  /{monthlyThreshold.toLocaleString('id-ID')}
+                  /{formatRupiah(monthlyThreshold)}
                 </p>
               </div>
             </div>
@@ -196,13 +280,13 @@ const RaceRow = ({ rank, data, maxTotal }) => {
               <div className="flex items-center gap-1">
                 <ShoppingBag className="w-3 h-3 text-blue-400" />
                 <span className="text-[9px] text-blue-400 font-bold">
-                  {(data.monthlyProductTotal || 0).toLocaleString('id-ID')}
+                  {formatRupiah(data.monthlyProductTotal || 0)}
                 </span>
               </div>
               <div className="flex items-center gap-1">
                 <Sparkles className="w-3 h-3 text-purple-400" />
                 <span className="text-[9px] text-purple-400 font-bold">
-                  {(data.monthlyTreatmentTotal || 0).toLocaleString('id-ID')}
+                  {formatRupiah(data.monthlyTreatmentTotal || 0)}
                 </span>
               </div>
             </div>
@@ -245,8 +329,10 @@ const RaceRow = ({ rank, data, maxTotal }) => {
 
           {/* Status Icon */}
           <div className="shrink-0">
-            {isOnTarget ? 
+            {barColor === 'green' ? 
               <TrendingUp className="w-6 h-6 text-green-400 drop-shadow-[0_0_6px_rgba(34,197,94,0.8)]" /> : 
+              barColor === 'yellow' ?
+              <TrendingUp className="w-6 h-6 text-yellow-400 drop-shadow-[0_0_6px_rgba(234,179,8,0.8)]" /> :
               <AlertCircle className="w-6 h-6 text-red-400 drop-shadow-[0_0_6px_rgba(239,68,68,0.8)]" />
             }
           </div>
@@ -284,9 +370,18 @@ function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  const maxTotal = leaderboard.length > 0 ? Math.max(...leaderboard.map(i => i.total)) * 1.1 : 1;
-  const totalRevenue = leaderboard.reduce((s, c) => s + c.total, 0);
-  const onTargetCount = leaderboard.filter(c => c.total >= getDailyTarget(c.name)).length;
+  const maxTotal = leaderboard.length > 0 ? Math.max(...leaderboard.map(i => i.monthlyTotal)) * 1.1 : 1;
+  const totalDailyRevenue = leaderboard.reduce((s, c) => s + c.total, 0);
+  const totalWeeklyRevenue = leaderboard.reduce((s, c) => s + c.weeklyTotal, 0);
+  const totalMonthlyRevenue = leaderboard.reduce((s, c) => s + c.monthlyTotal, 0);
+  
+  // On target count based on monthly achievement >= 80% (green)
+  const onTargetCount = leaderboard.filter(c => {
+    const monthlyTarget = getMonthlyTarget(c.name);
+    const monthlyAchievement = monthlyTarget > 0 ? Math.round((c.monthlyTotal / monthlyTarget) * 100) : 0;
+    return monthlyAchievement >= 80;
+  }).length;
+  
   const remaining = getRemainingDays();
   
   // Get current period (month name)
@@ -326,19 +421,35 @@ function Dashboard() {
           </div>
 
           {/* Hari Ini */}
-          <div className="bg-gradient-to-br from-green-500/20 to-emerald-600/20 backdrop-blur-sm border border-green-500/50 rounded-lg px-3 py-1.5 shadow-lg">
-            <p className="text-[10px] text-green-400 font-black flex items-center gap-1">
+          <div className="bg-gradient-to-br from-blue-500/20 to-cyan-600/20 backdrop-blur-sm border border-blue-500/50 rounded-lg px-3 py-1.5 shadow-lg">
+            <p className="text-[10px] text-blue-400 font-black flex items-center gap-1">
               <Zap className="w-3 h-3" /> HARI INI
             </p>
-            <p className="text-sm font-black text-green-300 drop-shadow-lg">Rp {totalRevenue.toLocaleString('id-ID')}</p>
+            <p className="text-sm font-black text-blue-300 drop-shadow-lg">Rp {formatRupiah(totalDailyRevenue)}</p>
+          </div>
+
+          {/* Minggu Ini */}
+          <div className="bg-gradient-to-br from-purple-500/20 to-violet-600/20 backdrop-blur-sm border border-purple-500/50 rounded-lg px-3 py-1.5 shadow-lg">
+            <p className="text-[10px] text-purple-400 font-black flex items-center gap-1">
+              <TrendingUp className="w-3 h-3" /> MINGGU INI
+            </p>
+            <p className="text-sm font-black text-purple-300 drop-shadow-lg">Rp {formatRupiah(totalWeeklyRevenue)}</p>
+          </div>
+
+          {/* Bulan Ini */}
+          <div className="bg-gradient-to-br from-green-500/20 to-emerald-600/20 backdrop-blur-sm border border-green-500/50 rounded-lg px-3 py-1.5 shadow-lg">
+            <p className="text-[10px] text-green-400 font-black flex items-center gap-1">
+              <Target className="w-3 h-3" /> BULAN INI
+            </p>
+            <p className="text-sm font-black text-green-300 drop-shadow-lg">Rp {formatRupiah(totalMonthlyRevenue)}</p>
           </div>
 
           {/* On Target */}
-          <div className="bg-gradient-to-br from-blue-500/20 to-cyan-600/20 backdrop-blur-sm border border-blue-500/50 rounded-lg px-3 py-1.5 shadow-lg">
-            <p className="text-[10px] text-blue-400 font-black flex items-center gap-1">
-              <Target className="w-3 h-3" /> ON TARGET
+          <div className="bg-gradient-to-br from-amber-500/20 to-yellow-600/20 backdrop-blur-sm border border-amber-500/50 rounded-lg px-3 py-1.5 shadow-lg">
+            <p className="text-[10px] text-amber-400 font-black flex items-center gap-1">
+              👍 TARGET HIJAU
             </p>
-            <p className="text-xl font-black text-blue-300 drop-shadow-lg">{onTargetCount}<span className="text-sm text-blue-400/70">/{leaderboard.length}</span></p>
+            <p className="text-xl font-black text-amber-300 drop-shadow-lg">{onTargetCount}<span className="text-sm text-amber-400/70">/{leaderboard.length}</span></p>
           </div>
 
           {/* Live Time */}
@@ -393,11 +504,15 @@ function Dashboard() {
         <div className="flex gap-6 text-[11px] text-slate-300 font-semibold">
           <span className="flex items-center gap-1.5">
             <span className="w-3 h-3 bg-gradient-to-br from-green-400 to-green-600 rounded shadow-lg shadow-green-500/50" />
-            On Target
+            ≥80% (Excellent)
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded shadow-lg shadow-yellow-500/50" />
+            70-79% (Good)
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-3 h-3 bg-gradient-to-br from-red-400 to-red-600 rounded shadow-lg shadow-red-500/50" />
-            Below Target
+            &lt;70% (Need Boost)
           </span>
           <span className="flex items-center gap-1.5">
             <ShoppingBag className="w-3 h-3 text-blue-400" />

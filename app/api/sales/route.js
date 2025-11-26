@@ -95,8 +95,8 @@ async function fetchWithParams(endpoint, params) {
         
         if (result.next_page_url) {
           page++;
-          // Longer delay to avoid rate limiting
-          await new Promise(resolve => setTimeout(resolve, 800));
+          // Minimal delay since rate limit is now 500/min
+          await new Promise(resolve => setTimeout(resolve, 150));
         } else {
           hasMorePages = false;
         }
@@ -222,8 +222,8 @@ async function fetchLeaderboardData() {
 
       // Fetch SEQUENTIALLY to avoid rate limiting
       const products = await fetchWithParams('laporan-penjualan-produk', productParams);
-      // Add delay between product and treatment requests
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Minimal delay since rate limit is now 500/min
+      await new Promise(resolve => setTimeout(resolve, 200));
       const treatments = await fetchWithParams('laporan-penjualan-perawatan', treatmentParams);
 
       // Aggregate Data
@@ -292,8 +292,8 @@ async function fetchLeaderboardData() {
       });
     }
 
-    // Sort by Daily Total Descending
-    leaderboard.sort((a, b) => b.total - a.total);
+    // Sort by Monthly Total Descending
+    leaderboard.sort((a, b) => b.monthlyTotal - a.monthlyTotal);
 
     return leaderboard;
 
