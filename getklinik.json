@@ -1,0 +1,72 @@
+[
+    {
+        "id": 2,
+        "nama_clinic": "Beauty Center Bantul",
+        "jenis": "beauty center"
+    },
+    {
+        "id": 3,
+        "nama_clinic": "Beauty Center Godean",
+        "jenis": "beauty center"
+    },
+    {
+        "id": 4,
+        "nama_clinic": "Beauty Center Kaliurang",
+        "jenis": "beauty center"
+    },
+    {
+        "id": 5,
+        "nama_clinic": "Beauty Center Kotagede",
+        "jenis": "beauty center"
+    },
+    {
+        "id": 6,
+        "nama_clinic": "Beauty Center Maguwoharjo",
+        "jenis": "beauty center"
+    },
+    {
+        "id": 7,
+        "nama_clinic": "Beauty Center Muntilan",
+        "jenis": "beauty center"
+    },
+    {
+        "id": 8,
+        "nama_clinic": "Beauty Center Parangtritis",
+        "jenis": "beauty center"
+    },
+    {
+        "id": 9,
+        "nama_clinic": "Beauty Center Piyungan",
+        "jenis": "beauty center"
+    },
+    {
+        "id": 10,
+        "nama_clinic": "Beauty Center Prambanan",
+        "jenis": "beauty center"
+    },
+    {
+        "id": 11,
+        "nama_clinic": "Beauty Center Wates",
+        "jenis": "beauty center"
+    },
+    {
+        "id": 14,
+        "nama_clinic": "Rumah Cantik Rajawali",
+        "jenis": "beauty center"
+    },
+    {
+        "id": 1,
+        "nama_clinic": "Klinik DRW Skincare Purworejo",
+        "jenis": "klinik"
+    },
+    {
+        "id": 12,
+        "nama_clinic": "Klinik DRW Skincare Kutoarjo",
+        "jenis": "klinik"
+    },
+    {
+        "id": 13,
+        "nama_clinic": "Klinik DRW Skincare Magelang",
+        "jenis": "klinik"
+    }
+]

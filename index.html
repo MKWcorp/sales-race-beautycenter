@@ -1,12 +1,53 @@
 <!doctype html>
-<html lang="en">
+<html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Beauty Sales Race</title>
+    <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0, user-scalable=no" />
+    
+    <!-- TV Optimization -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="screen-orientation" content="landscape" />
+    <meta name="msapplication-TileColor" content="#0f172a" />
+    <meta name="theme-color" content="#0f172a" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Disable text selection & cursor for TV -->
+    <style>
+      * {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        cursor: none !important;
+      }
+    </style>
+    
+    <title>Beauty Sales Race - Dashboard TV</title>
   </head>
   <body class="bg-slate-900 text-white overflow-hidden">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- Auto Fullscreen for TV -->
+    <script>
+      // Request fullscreen on first interaction (required by browsers)
+      document.addEventListener('click', function requestFullscreen() {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen();
+        } else if (document.documentElement.webkitRequestFullscreen) {
+          document.documentElement.webkitRequestFullscreen();
+        }
+        document.removeEventListener('click', requestFullscreen);
+      }, { once: true });
+      
+      // Prevent screen sleep (keep display on)
+      if ('wakeLock' in navigator) {
+        navigator.wakeLock.request('screen').catch(() => {});
+      }
+    </script>
   </body>
 </html>

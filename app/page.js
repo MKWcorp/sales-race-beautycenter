@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { Trophy, TrendingUp, AlertCircle, Zap, Target, Clock, Flame, Swords, Crown } from 'lucide-react';
-import { getAggregatedData } from './services/api';
+'use client';
 
-// PIC Data
+import { useEffect, useState } from 'react';
+import { Trophy, TrendingUp, AlertCircle, Zap, Target, Clock, Flame, Swords, Crown, CheckCircle, Skull } from 'lucide-react';
+
+// PIC Data - Beauty Center Only
 const PIC_DATA = {
   "Beauty Center Kaliurang": "Pak Eri", "Kaliurang": "Pak Eri",
   "Beauty Center Parangtritis": "Bu Hani", "Jl paris Prawirotaman": "Bu Hani",
@@ -14,40 +15,45 @@ const PIC_DATA = {
   "Rumah Cantik Rajawali": "Pak Andri", "Rumah cantik Rajawali": "Pak Andri",
   "Beauty Center Muntilan": "Bu Ning", "Muntilan": "Bu Ning",
   "Beauty Center Wates": "TBD", "Wates": "TBD",
-  "Klinik DRW Skincare Magelang": "Klinik", "Clinic magelang": "Klinik",
-  "Klinik DRW Skincare Purworejo": "Klinik", "clinic purworejo": "Klinik",
-  "Klinik DRW Skincare Kutoarjo": "Klinik", "Cinic Kuotarjo": "Klinik",
 };
 
-// Target Bulanan
+// Target Bulanan NOVEMBER 2025 - Beauty Center Only
 const MONTHLY_TARGETS = {
-  "Klinik DRW Skincare Magelang": 124350000, "Clinic magelang": 124350000,
-  "Klinik DRW Skincare Purworejo": 321828000, "clinic purworejo": 321828000,
-  "Klinik DRW Skincare Kutoarjo": 321828000, "Cinic Kuotarjo": 321828000,
-  "Rumah Cantik Rajawali": 32650080, "Rumah cantik Rajawali": 32650080,
   "Beauty Center Kaliurang": 64560000, "Kaliurang": 64560000,
-  "Jl paris Prawirotaman": 76597680,
-  "Beauty Center Maguwoharjo": 77970480, "Maguwoharjo tajem": 77970480,
-  "Beauty Center Kotagede": 69834960, "Kota gede": 69834960,
-  "Beauty Center Bantul": 73374040, "bantul": 73374040,
-  "Beauty Center Prambanan": 66057600, "Prambanan": 66057600,
+  "Beauty Center Parangtritis": 76597680, "Jl paris Prawirotaman": 76597680,
   "Beauty Center Godean": 74609760, "Godean": 74609760,
+  "Beauty Center Kotagede": 69834960, "Kota gede": 69834960,
+  "Beauty Center Prambanan": 66057600, "Prambanan": 66057600,
+  "Beauty Center Bantul": 73374040, "bantul": 73374040,
+  "Beauty Center Maguwoharjo": 77970480, "Maguwoharjo tajem": 77970480,
+  "Rumah Cantik Rajawali": 32650080, "Rumah cantik Rajawali": 32650080,
   "Beauty Center Muntilan": 61705400, "Muntilan": 61705400,
   "Beauty Center Wates": 69240000, "Wates": 69240000,
 };
 
 const PROGRAM_END = new Date('2026-03-01');
-const getDaysInMonth = () => new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
-const getDailyTarget = (name) => Math.round((MONTHLY_TARGETS[name] || 50000000) / getDaysInMonth());
+// November 2025 = 30 hari
+const DAYS_IN_NOVEMBER = 30;
+const getDailyTarget = (name) => Math.round((MONTHLY_TARGETS[name] || 50000000) / DAYS_IN_NOVEMBER);
+const getWeeklyTarget = (name) => getDailyTarget(name) * 7;
+const getMonthlyTarget = (name) => MONTHLY_TARGETS[name] || 50000000;
 const getPIC = (name) => PIC_DATA[name] || "TBD";
 const getRemainingDays = () => Math.max(0, Math.ceil((PROGRAM_END - new Date()) / 86400000));
 
-// Row Component - Battle Theme
-const RaceRow = ({ rank, data, maxTotal }) => {
+// Row Component
+const RaceRow = ({ rank, data, maxTotal, weeklyTotal, monthlyTotal }) => {
   const target = getDailyTarget(data.name);
+  const weeklyTarget = getWeeklyTarget(data.name);
+  const monthlyTarget = getMonthlyTarget(data.name);
+  
   const percent = maxTotal > 0 ? Math.min((data.total / maxTotal) * 100, 100) : 0;
   const achievement = target > 0 ? Math.round((data.total / target) * 100) : 0;
+  const weeklyAchievement = weeklyTarget > 0 ? Math.round((weeklyTotal / weeklyTarget) * 100) : 0;
+  const monthlyAchievement = monthlyTarget > 0 ? Math.round((monthlyTotal / monthlyTarget) * 100) : 0;
+  
   const isOnTarget = data.total >= target;
+  const isWeeklyOnTarget = weeklyTotal >= weeklyTarget;
+  const isMonthlyOnTarget = monthlyTotal >= monthlyTarget;
   const pic = getPIC(data.name);
 
   const getRankStyle = () => {
@@ -58,7 +64,7 @@ const RaceRow = ({ rank, data, maxTotal }) => {
   };
 
   return (
-    <div className="flex items-center gap-3 px-4">
+    <div className="flex items-center gap-3 px-2 w-full">
       {/* Rank Badge */}
       <div className={`w-10 h-10 flex items-center justify-center rounded-lg font-black text-base shrink-0 relative ${getRankStyle()}`}>
         {rank === 1 && <Crown className="w-3 h-3 absolute -top-1 -right-1 text-yellow-300 animate-pulse" />}
@@ -66,7 +72,7 @@ const RaceRow = ({ rank, data, maxTotal }) => {
       </div>
 
       {/* Main Bar */}
-      <div className={`flex-1 h-12 rounded-lg relative overflow-hidden flex items-center px-4 transition-all duration-300
+      <div className={`flex-1 h-14 rounded-lg relative overflow-hidden flex items-center px-4 transition-all duration-300
         ${isOnTarget ? 'bg-gradient-to-r from-slate-800 to-slate-900 ring-2 ring-green-500/70 shadow-lg shadow-green-500/20' : 'bg-gradient-to-r from-slate-800 to-slate-900 ring-2 ring-red-500/70 shadow-lg shadow-red-500/20'}`}>
         
         {/* Animated Fill */}
@@ -89,6 +95,46 @@ const RaceRow = ({ rank, data, maxTotal }) => {
             <p className="text-amber-400 text-[11px] font-semibold mt-0.5">👤 {pic}</p>
           </div>
 
+          {/* Weekly Status */}
+          <div className="flex flex-col items-center shrink-0 min-w-[140px]">
+            <div className="flex items-center gap-1.5">
+              {isWeeklyOnTarget ? (
+                <CheckCircle className="w-4 h-4 text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
+              ) : (
+                <Skull className="w-4 h-4 text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+              )}
+              <div className="text-right">
+                <p className={`text-[10px] font-bold leading-tight ${isWeeklyOnTarget ? 'text-green-400' : 'text-red-400'}`}>
+                  {weeklyTotal.toLocaleString('id-ID')}
+                </p>
+                <p className="text-[9px] text-slate-500 leading-tight">
+                  /{weeklyTarget.toLocaleString('id-ID')}
+                </p>
+              </div>
+            </div>
+            <span className="text-[8px] text-slate-400 font-semibold mt-0.5">MINGGU</span>
+          </div>
+
+          {/* Monthly Status */}
+          <div className="flex flex-col items-center shrink-0 min-w-[140px]">
+            <div className="flex items-center gap-1.5">
+              {isMonthlyOnTarget ? (
+                <CheckCircle className="w-4 h-4 text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
+              ) : (
+                <Skull className="w-4 h-4 text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+              )}
+              <div className="text-right">
+                <p className={`text-[10px] font-bold leading-tight ${isMonthlyOnTarget ? 'text-green-400' : 'text-red-400'}`}>
+                  {monthlyTotal.toLocaleString('id-ID')}
+                </p>
+                <p className="text-[9px] text-slate-500 leading-tight">
+                  /{monthlyTarget.toLocaleString('id-ID')}
+                </p>
+              </div>
+            </div>
+            <span className="text-[8px] text-slate-400 font-semibold mt-0.5">BULAN</span>
+          </div>
+
           {/* Achievement Badge */}
           <div className={`px-3 py-1 rounded-md text-xs font-black shrink-0 shadow-lg
             ${achievement >= 100 ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-green-500/50' : 
@@ -97,9 +143,17 @@ const RaceRow = ({ rank, data, maxTotal }) => {
             {achievement}%
           </div>
 
-          {/* Revenue */}
-          <div className="font-mono font-black text-sm text-white drop-shadow-md w-24 text-right shrink-0">
-            Rp {(data.total/1000000).toFixed(1)}jt
+          {/* Daily Revenue & Target */}
+          <div className="flex flex-col items-end shrink-0 min-w-[150px]">
+            <div className="text-right">
+              <p className={`text-[11px] font-bold leading-tight ${isOnTarget ? 'text-green-400' : 'text-red-400'}`}>
+                {data.total.toLocaleString('id-ID')}
+              </p>
+              <p className="text-[9px] text-slate-500 leading-tight">
+                /{target.toLocaleString('id-ID')}
+              </p>
+            </div>
+            <span className="text-[8px] text-slate-400 font-semibold mt-0.5">HARI INI</span>
           </div>
 
           {/* Status Icon */}
@@ -115,16 +169,26 @@ const RaceRow = ({ rank, data, maxTotal }) => {
   );
 };
 
-function App() {
+function Dashboard() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(new Date());
 
   const fetchData = async () => {
-    const data = await getAggregatedData();
-    setLeaderboard(data);
-    setLoading(false);
-    setLastUpdated(new Date());
+    try {
+      const res = await fetch('/api/sales');
+      if (!res.ok) throw new Error('API request failed');
+      const data = await res.json();
+      setLeaderboard(data);
+      setLoading(false);
+      setError(false);
+      setLastUpdated(new Date());
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setLoading(false);
+      setError(true);
+    }
   };
 
   useEffect(() => {
@@ -137,9 +201,12 @@ function App() {
   const totalRevenue = leaderboard.reduce((s, c) => s + c.total, 0);
   const onTargetCount = leaderboard.filter(c => c.total >= getDailyTarget(c.name)).length;
   const remaining = getRemainingDays();
+  
+  // Get current period (month name)
+  const currentMonth = new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
 
   return (
-    <div className="h-screen w-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white flex flex-col relative overflow-hidden">
+    <div className="h-screen w-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white flex flex-col relative overflow-hidden m-0 p-0">
       
       {/* Background Battle Pattern */}
       <div className="absolute inset-0 opacity-5">
@@ -149,7 +216,7 @@ function App() {
       </div>
 
       {/* HEADER */}
-      <header className="h-16 shrink-0 flex items-center justify-between px-6 bg-gradient-to-r from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-sm border-b-2 border-orange-500/30 relative z-10 shadow-lg shadow-black/50">
+      <header className="h-14 shrink-0 flex items-center justify-between px-4 bg-gradient-to-r from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-sm border-b-2 border-orange-500/30 relative z-10 shadow-lg shadow-black/50">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-gradient-to-br from-orange-500 via-red-600 to-orange-700 rounded-xl flex items-center justify-center shadow-lg shadow-orange-600/50 animate-pulse">
             <Swords className="w-7 h-7 text-white drop-shadow-lg" />
@@ -158,7 +225,7 @@ function App() {
             <h1 className="text-xl font-black bg-gradient-to-r from-orange-400 via-red-500 to-orange-400 bg-clip-text text-transparent drop-shadow-lg">
               BATTLE BUSINESS GAME
             </h1>
-            <p className="text-[11px] text-slate-400 font-semibold">🏆 Program 90 Hari Challenge • Supervisor: Bu Putri</p>
+            <p className="text-[11px] text-slate-400 font-semibold">🏆 Program 90 Hari Challenge • Supervisor: Bu Putri • Periode: {currentMonth}</p>
           </div>
         </div>
 
@@ -176,7 +243,7 @@ function App() {
             <p className="text-[10px] text-green-400 font-black flex items-center gap-1">
               <Zap className="w-3 h-3" /> HARI INI
             </p>
-            <p className="text-base font-black text-green-300 drop-shadow-lg">Rp {(totalRevenue/1000000).toFixed(0)}jt</p>
+            <p className="text-sm font-black text-green-300 drop-shadow-lg">Rp {totalRevenue.toLocaleString('id-ID')}</p>
           </div>
 
           {/* On Target */}
@@ -200,7 +267,7 @@ function App() {
       </header>
 
       {/* LEADERBOARD */}
-      <main className="flex-1 overflow-hidden flex flex-col py-3 gap-1.5 relative z-10">
+      <main className="flex-1 overflow-hidden flex flex-col py-2 gap-1 relative z-10 px-2">
         {loading ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="relative">
@@ -208,15 +275,36 @@ function App() {
               <Swords className="w-8 h-8 text-orange-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
             </div>
           </div>
+        ) : error ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4 animate-pulse" />
+              <h2 className="text-2xl font-black text-red-400 mb-2">GAGAL AMBIL DATA</h2>
+              <p className="text-slate-400 mb-4">Tidak dapat terhubung ke server</p>
+              <button 
+                onClick={fetchData}
+                className="px-6 py-2 bg-gradient-to-r from-orange-500 to-red-600 rounded-lg font-bold hover:from-orange-600 hover:to-red-700 transition-all shadow-lg"
+              >
+                🔄 Coba Lagi
+              </button>
+            </div>
+          </div>
         ) : (
           leaderboard.map((clinic, i) => (
-            <RaceRow key={clinic.name} rank={i+1} data={clinic} maxTotal={maxTotal} />
+            <RaceRow 
+              key={clinic.name} 
+              rank={i+1} 
+              data={clinic} 
+              maxTotal={maxTotal}
+              weeklyTotal={clinic.weeklyTotal || 0}
+              monthlyTotal={clinic.monthlyTotal || 0}
+            />
           ))
         )}
       </main>
 
       {/* FOOTER */}
-      <footer className="h-10 shrink-0 flex items-center justify-between px-6 bg-gradient-to-r from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-sm border-t-2 border-orange-500/30 relative z-10 shadow-lg shadow-black/50">
+      <footer className="h-8 shrink-0 flex items-center justify-between px-4 bg-gradient-to-r from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-sm border-t-2 border-orange-500/30 relative z-10 shadow-lg shadow-black/50">
         <div className="flex gap-6 text-[11px] text-slate-300 font-semibold">
           <span className="flex items-center gap-1.5">
             <span className="w-3 h-3 bg-gradient-to-br from-green-400 to-green-600 rounded shadow-lg shadow-green-500/50" />
@@ -236,4 +324,4 @@ function App() {
   );
 }
 
-export default App;
+export default Dashboard;

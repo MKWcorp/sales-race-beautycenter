@@ -5,7 +5,7 @@ const API_BASE_URL = 'https://clinic.beautycenter.id/api';
 // Use a proxy if needed, or direct if CORS allows. 
 // For development in some environments, you might need a CORS proxy.
 
-// Mock Data from user provided files (Fallback)
+// Mock Data - Beauty Center Only (No Klinik)
 const MOCK_CLINICS = [
     { id: 2, nama_clinic: "Beauty Center Bantul" },
     { id: 3, nama_clinic: "Beauty Center Godean" },
@@ -14,13 +14,9 @@ const MOCK_CLINICS = [
     { id: 6, nama_clinic: "Beauty Center Maguwoharjo" },
     { id: 7, nama_clinic: "Beauty Center Muntilan" },
     { id: 8, nama_clinic: "Beauty Center Parangtritis" },
-    { id: 9, nama_clinic: "Beauty Center Piyungan" },
     { id: 10, nama_clinic: "Beauty Center Prambanan" },
     { id: 11, nama_clinic: "Beauty Center Wates" },
     { id: 14, nama_clinic: "Rumah Cantik Rajawali" },
-    { id: 1, nama_clinic: "Klinik DRW Skincare Purworejo" },
-    { id: 12, nama_clinic: "Klinik DRW Skincare Kutoarjo" },
-    { id: 13, nama_clinic: "Klinik DRW Skincare Magelang" }
 ];
 
 export const fetchClinics = async () => {
