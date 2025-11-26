@@ -465,7 +465,7 @@ function Dashboard() {
       </header>
 
       {/* LEADERBOARD */}
-      <main className="flex-1 overflow-hidden flex flex-col py-2 gap-1 relative z-10 px-2">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col py-2 gap-1 relative z-10 px-2">
         {loading ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="relative">
