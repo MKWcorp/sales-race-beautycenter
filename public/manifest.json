@@ -1,7 +1,7 @@
 {
-  "name": "Beauty Sales Race",
-  "short_name": "SalesRace",
-  "description": "Realtime Sales Race Dashboard untuk Android TV",
+  "name": "Battle Business Game - Race Beauty Center",
+  "short_name": "Battle Business",
+  "description": "Dashboard perlombaan omset klinik kecantikan",
   "start_url": "/",
   "display": "fullscreen",
   "orientation": "landscape",
@@ -11,12 +11,14 @@
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
   "categories": ["business", "productivity"]

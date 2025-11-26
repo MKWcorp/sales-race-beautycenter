@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Generate Icons</title>
+</head>
+<body>
+  <canvas id="canvas192" width="192" height="192"></canvas>
+  <canvas id="canvas512" width="512" height="512"></canvas>
+  <p>Loading logo...</p>
+  <script>
+    const logo = new Image();
+    logo.src = '/logo.png';
+    
+    logo.onload = () => {
+      // Icon 192x192
+      const canvas192 = document.getElementById('canvas192');
+      const ctx192 = canvas192.getContext('2d');
+      ctx192.fillStyle = '#ffffff';
+      ctx192.fillRect(0, 0, 192, 192);
+      
+      // Draw logo centered and scaled
+      const size192 = 160;
+      const x192 = (192 - size192) / 2;
+      const y192 = (192 - size192) / 2;
+      ctx192.drawImage(logo, x192, y192, size192, size192);
+      
+      // Icon 512x512
+      const canvas512 = document.getElementById('canvas512');
+      const ctx512 = canvas512.getContext('2d');
+      ctx512.fillStyle = '#ffffff';
+      ctx512.fillRect(0, 0, 512, 512);
+      
+      // Draw logo centered and scaled
+      const size512 = 440;
+      const x512 = (512 - size512) / 2;
+      const y512 = (512 - size512) / 2;
+      ctx512.drawImage(logo, x512, y512, size512, size512);
+      
+      // Download links
+      document.body.innerHTML = '<h2>Icons generated! Right-click to save:</h2>';
+      
+      const img192 = document.createElement('img');
+      img192.src = canvas192.toDataURL();
+      img192.style.margin = '10px';
+      img192.style.border = '2px solid #ccc';
+      document.body.appendChild(img192);
+      
+      const link192 = document.createElement('a');
+      link192.download = 'icon-192.png';
+      link192.href = canvas192.toDataURL();
+      link192.textContent = 'Download icon-192.png';
+      link192.style.display = 'block';
+      link192.style.margin = '10px';
+      document.body.appendChild(link192);
+      
+      document.body.appendChild(document.createElement('br'));
+      
+      const img512 = document.createElement('img');
+      img512.src = canvas512.toDataURL();
+      img512.style.margin = '10px';
+      img512.style.border = '2px solid #ccc';
+      img512.style.maxWidth = '300px';
+      document.body.appendChild(img512);
+      
+      const link512 = document.createElement('a');
+      link512.download = 'icon-512.png';
+      link512.href = canvas512.toDataURL();
+      link512.textContent = 'Download icon-512.png';
+      link512.style.display = 'block';
+      link512.style.margin = '10px';
+      document.body.appendChild(link512);
+    };
+    
+    logo.onerror = () => {
+      document.body.innerHTML = '<h2 style="color:red">Error: logo.png not found!</h2>';
+    };
+  </script>
+</body>
+</html>
