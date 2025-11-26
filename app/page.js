@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Trophy, TrendingUp, AlertCircle, Zap, Target, Clock, Flame, Swords, Crown, CheckCircle, Skull } from 'lucide-react';
+import { Trophy, TrendingUp, AlertCircle, Zap, Target, Clock, Flame, Swords, Crown, CheckCircle, Skull, ShoppingBag, Sparkles } from 'lucide-react';
 
 // PIC Data - Beauty Center Only
 const PIC_DATA = {
@@ -41,19 +41,28 @@ const getPIC = (name) => PIC_DATA[name] || "TBD";
 const getRemainingDays = () => Math.max(0, Math.ceil((PROGRAM_END - new Date()) / 86400000));
 
 // Row Component
-const RaceRow = ({ rank, data, maxTotal, weeklyTotal, monthlyTotal }) => {
+const RaceRow = ({ rank, data, maxTotal }) => {
   const target = getDailyTarget(data.name);
   const weeklyTarget = getWeeklyTarget(data.name);
   const monthlyTarget = getMonthlyTarget(data.name);
   
-  const percent = maxTotal > 0 ? Math.min((data.total / maxTotal) * 100, 100) : 0;
-  const achievement = target > 0 ? Math.round((data.total / target) * 100) : 0;
-  const weeklyAchievement = weeklyTarget > 0 ? Math.round((weeklyTotal / weeklyTarget) * 100) : 0;
-  const monthlyAchievement = monthlyTarget > 0 ? Math.round((monthlyTotal / monthlyTarget) * 100) : 0;
+  // Use 100% as target (not 70%)
+  const dailyThreshold = target;
+  const weeklyThreshold = weeklyTarget;
+  const monthlyThreshold = monthlyTarget;
   
-  const isOnTarget = data.total >= target;
-  const isWeeklyOnTarget = weeklyTotal >= weeklyTarget;
-  const isMonthlyOnTarget = monthlyTotal >= monthlyTarget;
+  const percent = maxTotal > 0 ? Math.min((data.total / maxTotal) * 100, 100) : 0;
+  const dailyAchievement = target > 0 ? Math.round((data.total / target) * 100) : 0;
+  const weeklyAchievement = weeklyTarget > 0 ? Math.round((data.weeklyTotal / weeklyTarget) * 100) : 0;
+  const monthlyAchievement = monthlyTarget > 0 ? Math.round((data.monthlyTotal / monthlyTarget) * 100) : 0;
+  
+  // Green if >= 80%, Yellow if 70-79%, Red if <70%
+  const isDailyOnTarget = dailyAchievement >= 70;
+  const isWeeklyOnTarget = weeklyAchievement >= 70;
+  const isMonthlyOnTarget = monthlyAchievement >= 70;
+  
+  // Hijau jika salah satu target 70% tercapai, merah jika semua belum tercapai
+  const isOnTarget = isDailyOnTarget || isWeeklyOnTarget || isMonthlyOnTarget;
   const pic = getPIC(data.name);
 
   const getRankStyle = () => {
@@ -64,15 +73,15 @@ const RaceRow = ({ rank, data, maxTotal, weeklyTotal, monthlyTotal }) => {
   };
 
   return (
-    <div className="flex items-center gap-3 px-2 w-full">
+    <div className="flex items-center gap-2 px-2 w-full">
       {/* Rank Badge */}
-      <div className={`w-10 h-10 flex items-center justify-center rounded-lg font-black text-base shrink-0 relative ${getRankStyle()}`}>
-        {rank === 1 && <Crown className="w-3 h-3 absolute -top-1 -right-1 text-yellow-300 animate-pulse" />}
+      <div className={`w-12 h-12 flex items-center justify-center rounded-lg font-black text-lg shrink-0 relative ${getRankStyle()}`}>
+        {rank === 1 && <Crown className="w-4 h-4 absolute -top-1 -right-1 text-yellow-300 animate-pulse" />}
         {rank}
       </div>
 
-      {/* Main Bar */}
-      <div className={`flex-1 h-14 rounded-lg relative overflow-hidden flex items-center px-4 transition-all duration-300
+      {/* Main Bar - Full Width */}
+      <div className={`flex-1 h-20 rounded-lg relative overflow-hidden flex items-center px-4 transition-all duration-300
         ${isOnTarget ? 'bg-gradient-to-r from-slate-800 to-slate-900 ring-2 ring-green-500/70 shadow-lg shadow-green-500/20' : 'bg-gradient-to-r from-slate-800 to-slate-900 ring-2 ring-red-500/70 shadow-lg shadow-red-500/20'}`}>
         
         {/* Animated Fill */}
@@ -83,84 +92,162 @@ const RaceRow = ({ rank, data, maxTotal, weeklyTotal, monthlyTotal }) => {
         
         {/* Glowing Bottom Accent */}
         <div 
-          className={`absolute bottom-0 left-0 h-1.5 transition-all duration-1000 ease-out ${isOnTarget ? 'bg-gradient-to-r from-green-400 to-green-600 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-gradient-to-r from-red-400 to-red-600 shadow-[0_0_10px_rgba(239,68,68,0.5)]'}`}
+          className={`absolute bottom-0 left-0 h-2 transition-all duration-1000 ease-out ${isOnTarget ? 'bg-gradient-to-r from-green-400 to-green-600 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-gradient-to-r from-red-400 to-red-600 shadow-[0_0_10px_rgba(239,68,68,0.5)]'}`}
           style={{ width: `${percent}%` }}
         />
 
         {/* Content */}
         <div className="relative z-10 flex items-center justify-between w-full gap-3">
           {/* Clinic Info */}
-          <div className="flex-1 min-w-0">
-            <p className="font-black text-sm text-white drop-shadow-md truncate leading-tight">{data.name}</p>
-            <p className="text-amber-400 text-[11px] font-semibold mt-0.5">👤 {pic}</p>
+          <div className="flex-shrink-0 w-[200px]">
+            <p className="font-black text-base text-white drop-shadow-md truncate leading-tight">{data.name}</p>
+            <p className="text-amber-400 text-xs font-semibold mt-1">👤 {pic}</p>
           </div>
 
-          {/* Weekly Status */}
-          <div className="flex flex-col items-center shrink-0 min-w-[140px]">
-            <div className="flex items-center gap-1.5">
+          {/* Daily Target */}
+          <div className="flex flex-col items-center shrink-0 w-[200px]">
+            <div className="flex items-center gap-2">
+              {isDailyOnTarget ? (
+                <CheckCircle className="w-5 h-5 text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
+              ) : (
+                <Skull className="w-5 h-5 text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+              )}
+              <div className="text-right">
+                <p className={`text-sm font-bold leading-tight ${isDailyOnTarget ? 'text-green-400' : 'text-red-400'}`}>
+                  {data.total.toLocaleString('id-ID')}
+                </p>
+                <p className="text-[10px] text-slate-500 leading-tight">
+                  /{dailyThreshold.toLocaleString('id-ID')}
+                </p>
+              </div>
+            </div>
+            {/* Product & Treatment breakdown for Daily */}
+            <div className="flex gap-3 mt-1">
+              <div className="flex items-center gap-1">
+                <ShoppingBag className="w-3 h-3 text-blue-400" />
+                <span className="text-[9px] text-blue-400 font-bold">
+                  {(data.productTotal || 0).toLocaleString('id-ID')}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-purple-400" />
+                <span className="text-[9px] text-purple-400 font-bold">
+                  {(data.treatmentTotal || 0).toLocaleString('id-ID')}
+                </span>
+              </div>
+            </div>
+            <span className="text-[9px] text-slate-400 font-semibold mt-1">HARI INI</span>
+          </div>
+
+          {/* Weekly Target */}
+          <div className="flex flex-col items-center shrink-0 w-[200px]">
+            <div className="flex items-center gap-2">
               {isWeeklyOnTarget ? (
-                <CheckCircle className="w-4 h-4 text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
+                <CheckCircle className="w-5 h-5 text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
               ) : (
-                <Skull className="w-4 h-4 text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+                <Skull className="w-5 h-5 text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
               )}
               <div className="text-right">
-                <p className={`text-[10px] font-bold leading-tight ${isWeeklyOnTarget ? 'text-green-400' : 'text-red-400'}`}>
-                  {weeklyTotal.toLocaleString('id-ID')}
+                <p className={`text-sm font-bold leading-tight ${isWeeklyOnTarget ? 'text-green-400' : 'text-red-400'}`}>
+                  {data.weeklyTotal.toLocaleString('id-ID')}
                 </p>
-                <p className="text-[9px] text-slate-500 leading-tight">
-                  /{weeklyTarget.toLocaleString('id-ID')}
+                <p className="text-[10px] text-slate-500 leading-tight">
+                  /{weeklyThreshold.toLocaleString('id-ID')}
                 </p>
               </div>
             </div>
-            <span className="text-[8px] text-slate-400 font-semibold mt-0.5">MINGGU</span>
+            {/* Product & Treatment breakdown for Weekly */}
+            <div className="flex gap-3 mt-1">
+              <div className="flex items-center gap-1">
+                <ShoppingBag className="w-3 h-3 text-blue-400" />
+                <span className="text-[9px] text-blue-400 font-bold">
+                  {(data.weeklyProductTotal || 0).toLocaleString('id-ID')}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-purple-400" />
+                <span className="text-[9px] text-purple-400 font-bold">
+                  {(data.weeklyTreatmentTotal || 0).toLocaleString('id-ID')}
+                </span>
+              </div>
+            </div>
+            <span className="text-[9px] text-slate-400 font-semibold mt-1">MINGGU INI</span>
           </div>
 
-          {/* Monthly Status */}
-          <div className="flex flex-col items-center shrink-0 min-w-[140px]">
-            <div className="flex items-center gap-1.5">
+          {/* Monthly Target */}
+          <div className="flex flex-col items-center shrink-0 w-[200px]">
+            <div className="flex items-center gap-2">
               {isMonthlyOnTarget ? (
-                <CheckCircle className="w-4 h-4 text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
+                <CheckCircle className="w-5 h-5 text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
               ) : (
-                <Skull className="w-4 h-4 text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+                <Skull className="w-5 h-5 text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
               )}
               <div className="text-right">
-                <p className={`text-[10px] font-bold leading-tight ${isMonthlyOnTarget ? 'text-green-400' : 'text-red-400'}`}>
-                  {monthlyTotal.toLocaleString('id-ID')}
+                <p className={`text-sm font-bold leading-tight ${isMonthlyOnTarget ? 'text-green-400' : 'text-red-400'}`}>
+                  {data.monthlyTotal.toLocaleString('id-ID')}
                 </p>
-                <p className="text-[9px] text-slate-500 leading-tight">
-                  /{monthlyTarget.toLocaleString('id-ID')}
+                <p className="text-[10px] text-slate-500 leading-tight">
+                  /{monthlyThreshold.toLocaleString('id-ID')}
                 </p>
               </div>
             </div>
-            <span className="text-[8px] text-slate-400 font-semibold mt-0.5">BULAN</span>
-          </div>
-
-          {/* Achievement Badge */}
-          <div className={`px-3 py-1 rounded-md text-xs font-black shrink-0 shadow-lg
-            ${achievement >= 100 ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-green-500/50' : 
-              achievement >= 75 ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-black shadow-yellow-500/50' : 
-              'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-red-500/50'}`}>
-            {achievement}%
-          </div>
-
-          {/* Daily Revenue & Target */}
-          <div className="flex flex-col items-end shrink-0 min-w-[150px]">
-            <div className="text-right">
-              <p className={`text-[11px] font-bold leading-tight ${isOnTarget ? 'text-green-400' : 'text-red-400'}`}>
-                {data.total.toLocaleString('id-ID')}
-              </p>
-              <p className="text-[9px] text-slate-500 leading-tight">
-                /{target.toLocaleString('id-ID')}
-              </p>
+            {/* Product & Treatment breakdown for Monthly */}
+            <div className="flex gap-3 mt-1">
+              <div className="flex items-center gap-1">
+                <ShoppingBag className="w-3 h-3 text-blue-400" />
+                <span className="text-[9px] text-blue-400 font-bold">
+                  {(data.monthlyProductTotal || 0).toLocaleString('id-ID')}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-purple-400" />
+                <span className="text-[9px] text-purple-400 font-bold">
+                  {(data.monthlyTreatmentTotal || 0).toLocaleString('id-ID')}
+                </span>
+              </div>
             </div>
-            <span className="text-[8px] text-slate-400 font-semibold mt-0.5">HARI INI</span>
+            <span className="text-[9px] text-slate-400 font-semibold mt-1">BULAN INI</span>
+          </div>
+
+          {/* Achievement Badges - 3 columns */}
+          <div className="flex flex-col gap-1 shrink-0">
+            {/* Daily Achievement */}
+            <div className="flex items-center gap-2">
+              <span className="text-[9px] text-slate-400 font-bold w-14">Harian:</span>
+              <div className={`px-2 py-0.5 rounded text-[10px] font-black shadow-md
+                ${dailyAchievement >= 80 ? 'bg-gradient-to-r from-green-500 to-green-600 text-white' : 
+                  dailyAchievement >= 70 ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-black' : 
+                  'bg-gradient-to-r from-red-500 to-red-600 text-white'}`}>
+                {dailyAchievement}%
+              </div>
+            </div>
+            {/* Weekly Achievement */}
+            <div className="flex items-center gap-2">
+              <span className="text-[9px] text-slate-400 font-bold w-14">Mingguan:</span>
+              <div className={`px-2 py-0.5 rounded text-[10px] font-black shadow-md
+                ${weeklyAchievement >= 80 ? 'bg-gradient-to-r from-green-500 to-green-600 text-white' : 
+                  weeklyAchievement >= 70 ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-black' : 
+                  'bg-gradient-to-r from-red-500 to-red-600 text-white'}`}>
+                {weeklyAchievement}%
+              </div>
+            </div>
+            {/* Monthly Achievement */}
+            <div className="flex items-center gap-2">
+              <span className="text-[9px] text-slate-400 font-bold w-14">Bulanan:</span>
+              <div className={`px-2 py-0.5 rounded text-[10px] font-black shadow-md
+                ${monthlyAchievement >= 80 ? 'bg-gradient-to-r from-green-500 to-green-600 text-white' : 
+                  monthlyAchievement >= 70 ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-black' : 
+                  'bg-gradient-to-r from-red-500 to-red-600 text-white'}`}>
+                {monthlyAchievement}%
+              </div>
+            </div>
           </div>
 
           {/* Status Icon */}
           <div className="shrink-0">
             {isOnTarget ? 
-              <TrendingUp className="w-5 h-5 text-green-400 drop-shadow-[0_0_6px_rgba(34,197,94,0.8)]" /> : 
-              <AlertCircle className="w-5 h-5 text-red-400 drop-shadow-[0_0_6px_rgba(239,68,68,0.8)]" />
+              <TrendingUp className="w-6 h-6 text-green-400 drop-shadow-[0_0_6px_rgba(34,197,94,0.8)]" /> : 
+              <AlertCircle className="w-6 h-6 text-red-400 drop-shadow-[0_0_6px_rgba(239,68,68,0.8)]" />
             }
           </div>
         </div>
@@ -296,8 +383,6 @@ function Dashboard() {
               rank={i+1} 
               data={clinic} 
               maxTotal={maxTotal}
-              weeklyTotal={clinic.weeklyTotal || 0}
-              monthlyTotal={clinic.monthlyTotal || 0}
             />
           ))
         )}
@@ -313,6 +398,14 @@ function Dashboard() {
           <span className="flex items-center gap-1.5">
             <span className="w-3 h-3 bg-gradient-to-br from-red-400 to-red-600 rounded shadow-lg shadow-red-500/50" />
             Below Target
+          </span>
+          <span className="flex items-center gap-1.5">
+            <ShoppingBag className="w-3 h-3 text-blue-400" />
+            Produk
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Sparkles className="w-3 h-3 text-purple-400" />
+            Treatment
           </span>
         </div>
         <p className="text-[11px] text-amber-400 font-bold flex items-center gap-2">
