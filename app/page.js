@@ -40,85 +40,39 @@ const getMonthlyTarget = (name) => MONTHLY_TARGETS[name] || 50000000;
 const getPIC = (name) => PIC_DATA[name] || "TBD";
 const getRemainingDays = () => Math.max(0, Math.ceil((PROGRAM_END - new Date()) / 86400000));
 
-// Format Rupiah dengan sensor 2 digit pertama jadi XX
+// Format Rupiah normal tanpa sensor
 const formatRupiah = (amount) => {
   if (!amount || amount === 0) return '0';
-  
-  // Konversi ke string tanpa format dulu untuk hitung digit
-  const numStr = amount.toString();
-  
-  // Kalau cuma 1 digit (0-9), return X
-  if (numStr.length === 1) return 'X';
-  
-  // Format dengan thousand separator
-  const formatted = amount.toLocaleString('id-ID');
-  
-  // Replace 2 digit pertama dengan XX (skip separator titik)
-  // Contoh: 12.345.678 -> XX.345.678
-  //         1.234.567 -> XX.234.567
-  let digitCount = 0;
-  let result = '';
-  
-  for (let i = 0; i < formatted.length; i++) {
-    if (formatted[i] >= '0' && formatted[i] <= '9') {
-      if (digitCount < 2) {
-        result += 'X';
-        digitCount++;
-      } else {
-        result += formatted[i];
-      }
-    } else {
-      result += formatted[i]; // Keep separator (.)
-    }
-  }
-  
-  return result;
+  return amount.toLocaleString('id-ID');
 };
 
 // Row Component
-const RaceRow = ({ rank, data, maxTotal }) => {
+const RaceRow = ({ rank, data }) => {
   const target = getDailyTarget(data.name);
   const weeklyTarget = getWeeklyTarget(data.name);
   const monthlyTarget = getMonthlyTarget(data.name);
-  
-  // Use 100% as target (not 70%)
+    // Use 100% as target (not 70%)
   const dailyThreshold = target;
   const weeklyThreshold = weeklyTarget;
   const monthlyThreshold = monthlyTarget;
   
-  const percent = maxTotal > 0 ? Math.min((data.monthlyTotal / maxTotal) * 100, 100) : 0;
+  // Calculate achievements
   const dailyAchievement = target > 0 ? Math.round((data.total / target) * 100) : 0;
   const weeklyAchievement = weeklyTarget > 0 ? Math.round((data.weeklyTotal / weeklyTarget) * 100) : 0;
   const monthlyAchievement = monthlyTarget > 0 ? Math.round((data.monthlyTotal / monthlyTarget) * 100) : 0;
   
-  // Green if >= 80%, Yellow if 70-79%, Red if <70%
-  const isDailyOnTarget = dailyAchievement >= 70;
-  const isWeeklyOnTarget = weeklyAchievement >= 70;
-  const isMonthlyOnTarget = monthlyAchievement >= 70;
+  // Bar length based on DAILY achievement (0-100%)
+  // If daily = 0, bar kosong. If daily = 100% target, bar penuh.
+  const percent = Math.min(dailyAchievement, 100);
   
-  // Status bar color priority: Monthly > Weekly > Daily
+  // Bar color based on DAILY achievement only
   // Green: >=80%, Yellow: 70-79%, Red: <70%
   let barColor = 'red'; // default
-  
-  // Priority 1: Check Monthly (highest priority)
-  if (monthlyAchievement >= 80) {
-    barColor = 'green';
-  } else if (monthlyAchievement >= 70) {
-    barColor = 'yellow';
-  }
-  // Priority 2: Check Weekly (if monthly not hit 70%)
-  else if (weeklyAchievement >= 80) {
-    barColor = 'green';
-  } else if (weeklyAchievement >= 70) {
-    barColor = 'yellow';
-  }
-  // Priority 3: Check Daily (if both monthly and weekly not hit 70%)
-  else if (dailyAchievement >= 80) {
+  if (dailyAchievement >= 80) {
     barColor = 'green';
   } else if (dailyAchievement >= 70) {
     barColor = 'yellow';
   }
-  // else: stays red
   
   const isOnTarget = barColor !== 'red'; // For ring border (green/yellow vs red)
   const pic = getPIC(data.name);
@@ -363,14 +317,12 @@ function Dashboard() {
       setError(true);
     }
   };
-
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, []);
 
-  const maxTotal = leaderboard.length > 0 ? Math.max(...leaderboard.map(i => i.monthlyTotal)) * 1.1 : 1;
   const totalDailyRevenue = leaderboard.reduce((s, c) => s + c.total, 0);
   const totalWeeklyRevenue = leaderboard.reduce((s, c) => s + c.weeklyTotal, 0);
   const totalMonthlyRevenue = leaderboard.reduce((s, c) => s + c.monthlyTotal, 0);
@@ -486,33 +438,30 @@ function Dashboard() {
                 🔄 Coba Lagi
               </button>
             </div>
-          </div>
-        ) : (
+          </div>        ) : (
           leaderboard.map((clinic, i) => (
             <RaceRow 
               key={clinic.name} 
               rank={i+1} 
-              data={clinic} 
-              maxTotal={maxTotal}
+              data={clinic}
             />
           ))
         )}
       </main>
 
-      {/* FOOTER */}
-      <footer className="h-8 shrink-0 flex items-center justify-between px-4 bg-gradient-to-r from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-sm border-t-2 border-orange-500/30 relative z-10 shadow-lg shadow-black/50">
+      {/* FOOTER */}      <footer className="h-8 shrink-0 flex items-center justify-between px-4 bg-gradient-to-r from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-sm border-t-2 border-orange-500/30 relative z-10 shadow-lg shadow-black/50">
         <div className="flex gap-6 text-[11px] text-slate-300 font-semibold">
           <span className="flex items-center gap-1.5">
             <span className="w-3 h-3 bg-gradient-to-br from-green-400 to-green-600 rounded shadow-lg shadow-green-500/50" />
-            ≥80% (Excellent)
+            ≥80% Target Harian
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-3 h-3 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded shadow-lg shadow-yellow-500/50" />
-            70-79% (Good)
+            70-79% Target Harian
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-3 h-3 bg-gradient-to-br from-red-400 to-red-600 rounded shadow-lg shadow-red-500/50" />
-            &lt;70% (Need Boost)
+            &lt;70% Target Harian
           </span>
           <span className="flex items-center gap-1.5">
             <ShoppingBag className="w-3 h-3 text-blue-400" />

@@ -3,8 +3,11 @@
 Aplikasi dashboard realtime untuk memonitor performa sales cabang klinik. Didesain khusus untuk tampilan TV (Landscape, Font Besar, Kontras Tinggi).
 
 ## Fitur
-- **Realtime Race:** Visualisasi balapan antar cabang berdasarkan total omset harian.
-- **Zona Indikator:** Hijau (Mencapai Target) vs Merah (Belum Mencapai Target).
+- **Realtime Race:** Visualisasi balapan antar cabang berdasarkan pencapaian bulanan.
+- **Progress Bar Harian:** Bar merah/kuning/hijau menunjukkan progres pencapaian target harian (0-100%).
+  - 🟢 Hijau: Sudah mencapai ≥80% target harian
+  - 🟡 Kuning: Mencapai 70-79% target harian  
+  - 🔴 Merah: Belum mencapai 70% target harian
 - **Auto Refresh:** Data diperbarui otomatis setiap 30 detik.
 - **TV Optimized:** UI bersih tanpa scrollbar, cocok untuk layar besar.
 
