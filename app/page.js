@@ -340,7 +340,7 @@ function Dashboard() {
   const currentMonth = new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
 
   return (
-    <div className="h-screen w-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white flex flex-col relative overflow-hidden m-0 p-0">
+    <div className="min-h-screen w-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white flex flex-col relative overflow-x-hidden m-0 p-0">
       
       {/* Background Battle Pattern */}
       <div className="absolute inset-0 opacity-5">
@@ -350,66 +350,66 @@ function Dashboard() {
       </div>
 
       {/* HEADER */}
-      <header className="h-14 shrink-0 flex items-center justify-between px-4 bg-gradient-to-r from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-sm border-b-2 border-orange-500/30 relative z-10 shadow-lg shadow-black/50">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-orange-500 via-red-600 to-orange-700 rounded-xl flex items-center justify-center shadow-lg shadow-orange-600/50 animate-pulse">
-            <Swords className="w-7 h-7 text-white drop-shadow-lg" />
+      <header className="shrink-0 flex flex-col lg:flex-row items-start lg:items-center justify-between px-2 lg:px-4 py-2 bg-gradient-to-r from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-sm border-b-2 border-orange-500/30 relative z-10 shadow-lg shadow-black/50 gap-2">
+        <div className="flex items-center gap-2 lg:gap-4 w-full lg:w-auto">
+          <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-orange-500 via-red-600 to-orange-700 rounded-xl flex items-center justify-center shadow-lg shadow-orange-600/50 animate-pulse shrink-0">
+            <Swords className="w-5 h-5 lg:w-7 lg:h-7 text-white drop-shadow-lg" />
           </div>
-          <div>
-            <h1 className="text-xl font-black bg-gradient-to-r from-orange-400 via-red-500 to-orange-400 bg-clip-text text-transparent drop-shadow-lg">
+          <div className="min-w-0">
+            <h1 className="text-base lg:text-xl font-black bg-gradient-to-r from-orange-400 via-red-500 to-orange-400 bg-clip-text text-transparent drop-shadow-lg">
               BATTLE BUSINESS GAME
             </h1>
-            <p className="text-[11px] text-slate-400 font-semibold">🏆 Program 90 Hari Challenge • Supervisor: Bu Putri • Periode: {currentMonth}</p>
+            <p className="text-[9px] lg:text-[11px] text-slate-400 font-semibold truncate">🏆 Program 90 Hari • Bu Putri • {currentMonth}</p>
           </div>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex gap-1.5 lg:gap-3 overflow-x-auto w-full lg:w-auto pb-1 lg:pb-0 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
           {/* Sisa Hari */}
-          <div className="bg-gradient-to-br from-orange-500/20 to-red-600/20 backdrop-blur-sm border border-orange-500/50 rounded-lg px-3 py-1.5 shadow-lg">
-            <p className="text-[10px] text-orange-400 font-black flex items-center gap-1">
-              <Flame className="w-3 h-3" /> SISA HARI
+          <div className="bg-gradient-to-br from-orange-500/20 to-red-600/20 backdrop-blur-sm border border-orange-500/50 rounded-lg px-2 lg:px-3 py-1 lg:py-1.5 shadow-lg shrink-0">
+            <p className="text-[9px] lg:text-[10px] text-orange-400 font-black flex items-center gap-1 whitespace-nowrap">
+              <Flame className="w-2.5 h-2.5 lg:w-3 lg:h-3" /> SISA HARI
             </p>
-            <p className="text-xl font-black text-orange-300 drop-shadow-lg">{remaining}</p>
+            <p className="text-base lg:text-xl font-black text-orange-300 drop-shadow-lg">{remaining}</p>
           </div>
 
           {/* Hari Ini */}
-          <div className="bg-gradient-to-br from-blue-500/20 to-cyan-600/20 backdrop-blur-sm border border-blue-500/50 rounded-lg px-3 py-1.5 shadow-lg">
-            <p className="text-[10px] text-blue-400 font-black flex items-center gap-1">
-              <Zap className="w-3 h-3" /> HARI INI
+          <div className="bg-gradient-to-br from-blue-500/20 to-cyan-600/20 backdrop-blur-sm border border-blue-500/50 rounded-lg px-2 lg:px-3 py-1 lg:py-1.5 shadow-lg shrink-0">
+            <p className="text-[9px] lg:text-[10px] text-blue-400 font-black flex items-center gap-1 whitespace-nowrap">
+              <Zap className="w-2.5 h-2.5 lg:w-3 lg:h-3" /> HARI INI
             </p>
-            <p className="text-sm font-black text-blue-300 drop-shadow-lg">Rp {formatRupiah(totalDailyRevenue)}</p>
+            <p className="text-xs lg:text-sm font-black text-blue-300 drop-shadow-lg whitespace-nowrap">Rp {formatRupiah(totalDailyRevenue)}</p>
           </div>
 
           {/* Minggu Ini */}
-          <div className="bg-gradient-to-br from-purple-500/20 to-violet-600/20 backdrop-blur-sm border border-purple-500/50 rounded-lg px-3 py-1.5 shadow-lg">
-            <p className="text-[10px] text-purple-400 font-black flex items-center gap-1">
-              <TrendingUp className="w-3 h-3" /> MINGGU INI
+          <div className="bg-gradient-to-br from-purple-500/20 to-violet-600/20 backdrop-blur-sm border border-purple-500/50 rounded-lg px-2 lg:px-3 py-1 lg:py-1.5 shadow-lg shrink-0">
+            <p className="text-[9px] lg:text-[10px] text-purple-400 font-black flex items-center gap-1 whitespace-nowrap">
+              <TrendingUp className="w-2.5 h-2.5 lg:w-3 lg:h-3" /> MINGGU INI
             </p>
-            <p className="text-sm font-black text-purple-300 drop-shadow-lg">Rp {formatRupiah(totalWeeklyRevenue)}</p>
+            <p className="text-xs lg:text-sm font-black text-purple-300 drop-shadow-lg whitespace-nowrap">Rp {formatRupiah(totalWeeklyRevenue)}</p>
           </div>
 
           {/* Bulan Ini */}
-          <div className="bg-gradient-to-br from-green-500/20 to-emerald-600/20 backdrop-blur-sm border border-green-500/50 rounded-lg px-3 py-1.5 shadow-lg">
-            <p className="text-[10px] text-green-400 font-black flex items-center gap-1">
-              <Target className="w-3 h-3" /> BULAN INI
+          <div className="bg-gradient-to-br from-green-500/20 to-emerald-600/20 backdrop-blur-sm border border-green-500/50 rounded-lg px-2 lg:px-3 py-1 lg:py-1.5 shadow-lg shrink-0">
+            <p className="text-[9px] lg:text-[10px] text-green-400 font-black flex items-center gap-1 whitespace-nowrap">
+              <Target className="w-2.5 h-2.5 lg:w-3 lg:h-3" /> BULAN INI
             </p>
-            <p className="text-sm font-black text-green-300 drop-shadow-lg">Rp {formatRupiah(totalMonthlyRevenue)}</p>
+            <p className="text-xs lg:text-sm font-black text-green-300 drop-shadow-lg whitespace-nowrap">Rp {formatRupiah(totalMonthlyRevenue)}</p>
           </div>
 
           {/* On Target */}
-          <div className="bg-gradient-to-br from-amber-500/20 to-yellow-600/20 backdrop-blur-sm border border-amber-500/50 rounded-lg px-3 py-1.5 shadow-lg">
-            <p className="text-[10px] text-amber-400 font-black flex items-center gap-1">
+          <div className="bg-gradient-to-br from-amber-500/20 to-yellow-600/20 backdrop-blur-sm border border-amber-500/50 rounded-lg px-2 lg:px-3 py-1 lg:py-1.5 shadow-lg shrink-0">
+            <p className="text-[9px] lg:text-[10px] text-amber-400 font-black flex items-center gap-1 whitespace-nowrap">
               👍 TARGET HIJAU
             </p>
-            <p className="text-xl font-black text-amber-300 drop-shadow-lg">{onTargetCount}<span className="text-sm text-amber-400/70">/{leaderboard.length}</span></p>
+            <p className="text-base lg:text-xl font-black text-amber-300 drop-shadow-lg">{onTargetCount}<span className="text-xs lg:text-sm text-amber-400/70">/{leaderboard.length}</span></p>
           </div>
 
           {/* Live Time */}
-          <div className="bg-gradient-to-br from-violet-500/20 to-purple-600/20 backdrop-blur-sm border border-violet-500/50 rounded-lg px-3 py-1.5 shadow-lg">
-            <p className="text-[10px] text-violet-400 font-black flex items-center gap-1">
-              <Clock className="w-3 h-3 animate-pulse" /> LIVE
+          <div className="bg-gradient-to-br from-violet-500/20 to-purple-600/20 backdrop-blur-sm border border-violet-500/50 rounded-lg px-2 lg:px-3 py-1 lg:py-1.5 shadow-lg shrink-0">
+            <p className="text-[9px] lg:text-[10px] text-violet-400 font-black flex items-center gap-1 whitespace-nowrap">
+              <Clock className="w-2.5 h-2.5 lg:w-3 lg:h-3 animate-pulse" /> LIVE
             </p>
-            <p className="text-base font-mono font-black text-green-400 drop-shadow-lg">
+            <p className="text-sm lg:text-base font-mono font-black text-green-400 drop-shadow-lg">
               {lastUpdated.toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'})}
             </p>
           </div>
