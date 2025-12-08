@@ -84,15 +84,15 @@ const RaceRow = ({ rank, data, filter }) => {
   };
 
   return (
-    <div className="flex items-center gap-2 px-2 w-full">
+    <div className="flex items-center gap-1.5 md:gap-2 px-1 md:px-2 w-full">
       {/* Rank Badge */}
-      <div className={`w-12 h-12 flex items-center justify-center rounded-lg font-black text-lg shrink-0 relative ${getRankStyle()}`}>
-        {rank === 1 && <Crown className="w-4 h-4 absolute -top-1 -right-1 text-yellow-300 animate-pulse" />}
+      <div className={`w-8 h-8 md:w-12 md:h-12 flex items-center justify-center rounded-lg font-black text-sm md:text-lg shrink-0 relative ${getRankStyle()}`}>
+        {rank === 1 && <Crown className="w-3 h-3 md:w-4 md:h-4 absolute -top-1 -right-1 text-yellow-300 animate-pulse" />}
         {rank}
       </div>
 
       {/* Main Bar - Full Width */}
-      <div className={`flex-1 h-20 rounded-lg relative overflow-hidden flex items-center px-4 transition-all duration-300
+      <div className={`flex-1 min-h-[80px] md:h-20 rounded-lg relative overflow-hidden flex items-center px-2 md:px-4 py-2 md:py-0 transition-all duration-300
         ${barColor === 'green' ? 'bg-gradient-to-r from-slate-800 to-slate-900 ring-2 ring-green-500/70 shadow-lg shadow-green-500/20' : 
           barColor === 'yellow' ? 'bg-gradient-to-r from-slate-800 to-slate-900 ring-2 ring-yellow-500/70 shadow-lg shadow-yellow-500/20' :
           'bg-gradient-to-r from-slate-800 to-slate-900 ring-2 ring-red-500/70 shadow-lg shadow-red-500/20'}`}>
@@ -116,52 +116,61 @@ const RaceRow = ({ rank, data, filter }) => {
         />
 
         {/* Content */}
-        <div className="relative z-10 flex items-center justify-between w-full gap-3">
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between w-full gap-2 md:gap-3">
           {/* Clinic Info */}
-          <div className="flex-shrink-0 w-[200px]">
-            <p className="font-black text-base text-white drop-shadow-md truncate leading-tight">{data.name}</p>
-            <p className="text-amber-400 text-xs font-semibold mt-1">👤 {pic}</p>
+          <div className="flex-shrink-0 w-full md:w-[200px]">
+            <p className="font-black text-sm md:text-base text-white drop-shadow-md truncate leading-tight">{data.name}</p>
+            <p className="text-amber-400 text-[10px] md:text-xs font-semibold mt-0.5 md:mt-1">👤 {pic}</p>
           </div>
 
           {/* Main Stats - Single column based on filter */}
-          <div className="flex flex-col items-center shrink-0 w-[220px]">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col items-start md:items-center shrink-0 w-full md:w-[220px]">
+            <div className="flex items-center gap-2 w-full md:w-auto justify-between md:justify-start">
               {achievement >= 80 ? (
-                <span className="text-2xl drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]">👍</span>
+                <span className="text-xl md:text-2xl drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]">👍</span>
               ) : achievement >= 70 ? (
-                <CheckCircle className="w-5 h-5 text-yellow-400 drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]" />
+                <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-yellow-400 drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]" />
               ) : (
-                <Skull className="w-5 h-5 text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+                <Skull className="w-4 h-4 md:w-5 md:h-5 text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
               )}
-              <div className="text-right">
-                <p className={`text-sm font-bold leading-tight ${
+              <div className="text-right flex-1 md:flex-initial">
+                <p className={`text-xs md:text-sm font-bold leading-tight ${
                   achievement >= 80 ? 'text-green-400' : 
                   achievement >= 70 ? 'text-yellow-400' : 
                   'text-red-400'
                 }`}>
                   {formatRupiah(data.total)}
                 </p>
-                <p className="text-[10px] text-slate-500 leading-tight">
+                <p className="text-[9px] md:text-[10px] text-slate-500 leading-tight">
                   /{formatRupiah(currentTarget)}
                 </p>
               </div>
+              {/* Achievement Badge - Mobile */}
+              <div className="md:hidden">
+                <div className={`px-2 py-0.5 rounded text-[9px] font-black shadow-md
+                  ${achievement >= 80 ? 'bg-gradient-to-r from-green-500 to-green-600 text-white' : 
+                    achievement >= 70 ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-black' : 
+                    'bg-gradient-to-r from-red-500 to-red-600 text-white'}`}>
+                  {achievement}%
+                </div>
+              </div>
             </div>
             {/* Product & Treatment breakdown */}
-            <div className="flex gap-3 mt-1">
+            <div className="flex gap-2 md:gap-3 mt-1 w-full md:w-auto justify-start">
               <div className="flex items-center gap-1">
-                <ShoppingBag className="w-3 h-3 text-blue-400" />
-                <span className="text-[9px] text-blue-400 font-bold">
+                <ShoppingBag className="w-2.5 h-2.5 md:w-3 md:h-3 text-blue-400" />
+                <span className="text-[8px] md:text-[9px] text-blue-400 font-bold">
                   {formatRupiah(data.productTotal || 0)}
                 </span>
               </div>
               <div className="flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-purple-400" />
-                <span className="text-[9px] text-purple-400 font-bold">
+                <Sparkles className="w-2.5 h-2.5 md:w-3 md:h-3 text-purple-400" />
+                <span className="text-[8px] md:text-[9px] text-purple-400 font-bold">
                   {formatRupiah(data.treatmentTotal || 0)}
                 </span>
               </div>
             </div>
-            <span className="text-[9px] text-slate-400 font-semibold mt-1 uppercase">
+            <span className="text-[8px] md:text-[9px] text-slate-400 font-semibold mt-0.5 md:mt-1 uppercase">
               {filter === 'daily' && 'HARI INI'}
               {filter === 'weekly' && 'MINGGU INI'}
               {filter === 'monthly' && 'BULAN INI'}
@@ -169,8 +178,8 @@ const RaceRow = ({ rank, data, filter }) => {
             </span>
           </div>
 
-          {/* Achievement Badge */}
-          <div className="flex flex-col gap-1 shrink-0">
+          {/* Achievement Badge - Desktop */}
+          <div className="hidden md:flex flex-col gap-1 shrink-0">
             <div className="flex items-center gap-2">
               <span className="text-[9px] text-slate-400 font-bold w-16 uppercase">
                 {filter === 'daily' && 'Harian:'}
@@ -187,8 +196,8 @@ const RaceRow = ({ rank, data, filter }) => {
             </div>
           </div>
 
-          {/* Status Icon */}
-          <div className="shrink-0">
+          {/* Status Icon - Desktop only */}
+          <div className="hidden md:block shrink-0">
             {barColor === 'green' ? 
               <TrendingUp className="w-6 h-6 text-green-400 drop-shadow-[0_0_6px_rgba(34,197,94,0.8)]" /> : 
               barColor === 'yellow' ?
@@ -312,23 +321,23 @@ function Dashboard() {
       </div>
 
       {/* HEADER */}
-      <header className="shrink-0 flex flex-col lg:flex-row items-start lg:items-center justify-between px-2 lg:px-4 py-2 bg-gradient-to-r from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-sm border-b-2 border-orange-500/30 relative z-10 shadow-lg shadow-black/50 gap-2">
-        <div className="flex items-center gap-2 lg:gap-4 w-full lg:w-auto">
-          <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-orange-500 via-red-600 to-orange-700 rounded-xl flex items-center justify-center shadow-lg shadow-orange-600/50 animate-pulse shrink-0">
-            <Swords className="w-5 h-5 lg:w-7 lg:h-7 text-white drop-shadow-lg" />
+      <header className="shrink-0 flex flex-col px-2 lg:px-4 py-2 bg-gradient-to-r from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-sm border-b-2 border-orange-500/30 relative z-10 shadow-lg shadow-black/50 gap-2">
+        <div className="flex items-center gap-2 lg:gap-4 w-full">
+          <div className="w-8 h-8 lg:w-12 lg:h-12 bg-gradient-to-br from-orange-500 via-red-600 to-orange-700 rounded-xl flex items-center justify-center shadow-lg shadow-orange-600/50 animate-pulse shrink-0">
+            <Swords className="w-4 h-4 lg:w-7 lg:h-7 text-white drop-shadow-lg" />
           </div>
           <div className="min-w-0 flex-1">
-            <h1 className="text-base lg:text-xl font-black bg-gradient-to-r from-orange-400 via-red-500 to-orange-400 bg-clip-text text-transparent drop-shadow-lg">
+            <h1 className="text-sm md:text-base lg:text-xl font-black bg-gradient-to-r from-orange-400 via-red-500 to-orange-400 bg-clip-text text-transparent drop-shadow-lg">
               BATTLE BUSINESS GAME
             </h1>
-            <p className="text-[9px] lg:text-[11px] text-slate-400 font-semibold truncate">🏆 Program 90 Hari • Bu Putri • {currentMonth}</p>
+            <p className="text-[8px] md:text-[9px] lg:text-[11px] text-slate-400 font-semibold truncate">🏆 Program 90 Hari • Bu Putri • {currentMonth}</p>
           </div>
           
           {/* Filter Buttons */}
-          <div className="flex gap-1 shrink-0">
+          <div className="flex gap-0.5 md:gap-1 shrink-0 flex-wrap justify-end">
             <button
               onClick={() => setFilter('daily')}
-              className={`px-2 lg:px-3 py-1 rounded-lg text-[10px] lg:text-xs font-bold transition-all ${
+              className={`px-1.5 md:px-2 lg:px-3 py-0.5 md:py-1 rounded-lg text-[8px] md:text-[10px] lg:text-xs font-bold transition-all ${
                 filter === 'daily' 
                   ? 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white shadow-lg shadow-blue-500/50' 
                   : 'bg-slate-700/50 text-slate-400 hover:bg-slate-600/50'
@@ -338,7 +347,7 @@ function Dashboard() {
             </button>
             <button
               onClick={() => setFilter('weekly')}
-              className={`px-2 lg:px-3 py-1 rounded-lg text-[10px] lg:text-xs font-bold transition-all ${
+              className={`px-1.5 md:px-2 lg:px-3 py-0.5 md:py-1 rounded-lg text-[8px] md:text-[10px] lg:text-xs font-bold transition-all ${
                 filter === 'weekly' 
                   ? 'bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-lg shadow-purple-500/50' 
                   : 'bg-slate-700/50 text-slate-400 hover:bg-slate-600/50'
@@ -348,7 +357,7 @@ function Dashboard() {
             </button>
             <button
               onClick={() => setFilter('monthly')}
-              className={`px-2 lg:px-3 py-1 rounded-lg text-[10px] lg:text-xs font-bold transition-all ${
+              className={`px-1.5 md:px-2 lg:px-3 py-0.5 md:py-1 rounded-lg text-[8px] md:text-[10px] lg:text-xs font-bold transition-all ${
                 filter === 'monthly' 
                   ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/50' 
                   : 'bg-slate-700/50 text-slate-400 hover:bg-slate-600/50'
@@ -358,7 +367,7 @@ function Dashboard() {
             </button>
             <button
               onClick={() => setFilter('yearly')}
-              className={`px-2 lg:px-3 py-1 rounded-lg text-[10px] lg:text-xs font-bold transition-all ${
+              className={`px-1.5 md:px-2 lg:px-3 py-0.5 md:py-1 rounded-lg text-[8px] md:text-[10px] lg:text-xs font-bold transition-all ${
                 filter === 'yearly' 
                   ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white shadow-lg shadow-amber-500/50' 
                   : 'bg-slate-700/50 text-slate-400 hover:bg-slate-600/50'
@@ -370,56 +379,56 @@ function Dashboard() {
         </div>
 
         {/* Period Selector */}
-        <div className="flex items-center gap-2 px-3 py-2">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-2 px-2 md:px-3 py-2 overflow-x-auto">
           {filter === 'daily' && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400">Tanggal:</span>
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              <span className="text-[10px] md:text-xs text-slate-400 shrink-0">Tanggal:</span>
               <input
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="px-2 py-1 rounded bg-slate-700/50 text-white text-xs border border-slate-600 focus:border-blue-500 focus:outline-none"
+                className="px-2 py-1 rounded bg-slate-700/50 text-white text-[10px] md:text-xs border border-slate-600 focus:border-blue-500 focus:outline-none flex-1 md:flex-initial"
               />
             </div>
           )}
           
           {filter === 'weekly' && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400">Minggu:</span>
+            <div className="flex flex-wrap items-center gap-1.5 md:gap-2 w-full">
+              <span className="text-[10px] md:text-xs text-slate-400 shrink-0">Minggu:</span>
               <select
                 value={selectedWeek}
                 onChange={(e) => setSelectedWeek(parseInt(e.target.value))}
-                className="px-2 py-1 rounded bg-slate-700/50 text-white text-xs border border-slate-600 focus:border-purple-500 focus:outline-none"
+                className="px-1.5 md:px-2 py-1 rounded bg-slate-700/50 text-white text-[10px] md:text-xs border border-slate-600 focus:border-purple-500 focus:outline-none"
               >
                 <option value="1">Minggu 1</option>
                 <option value="2">Minggu 2</option>
                 <option value="3">Minggu 3</option>
                 <option value="4">Minggu 4</option>
               </select>
-              <span className="text-xs text-slate-400">Bulan:</span>
+              <span className="text-[10px] md:text-xs text-slate-400 shrink-0">Bulan:</span>
               <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-                className="px-2 py-1 rounded bg-slate-700/50 text-white text-xs border border-slate-600 focus:border-purple-500 focus:outline-none"
+                className="px-1.5 md:px-2 py-1 rounded bg-slate-700/50 text-white text-[10px] md:text-xs border border-slate-600 focus:border-purple-500 focus:outline-none"
               >
-                <option value="1">Januari</option>
-                <option value="2">Februari</option>
-                <option value="3">Maret</option>
-                <option value="4">April</option>
+                <option value="1">Jan</option>
+                <option value="2">Feb</option>
+                <option value="3">Mar</option>
+                <option value="4">Apr</option>
                 <option value="5">Mei</option>
-                <option value="6">Juni</option>
-                <option value="7">Juli</option>
-                <option value="8">Agustus</option>
-                <option value="9">September</option>
-                <option value="10">Oktober</option>
-                <option value="11">November</option>
-                <option value="12">Desember</option>
+                <option value="6">Jun</option>
+                <option value="7">Jul</option>
+                <option value="8">Agu</option>
+                <option value="9">Sep</option>
+                <option value="10">Okt</option>
+                <option value="11">Nov</option>
+                <option value="12">Des</option>
               </select>
-              <span className="text-xs text-slate-400">Tahun:</span>
+              <span className="text-[10px] md:text-xs text-slate-400 shrink-0">Tahun:</span>
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                className="px-2 py-1 rounded bg-slate-700/50 text-white text-xs border border-slate-600 focus:border-purple-500 focus:outline-none"
+                className="px-1.5 md:px-2 py-1 rounded bg-slate-700/50 text-white text-[10px] md:text-xs border border-slate-600 focus:border-purple-500 focus:outline-none"
               >
                 {[2022, 2023, 2024, 2025].map(year => (
                   <option key={year} value={year}>{year}</option>
@@ -429,12 +438,12 @@ function Dashboard() {
           )}
           
           {filter === 'monthly' && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400">Bulan:</span>
+            <div className="flex flex-wrap items-center gap-1.5 md:gap-2 w-full">
+              <span className="text-[10px] md:text-xs text-slate-400 shrink-0">Bulan:</span>
               <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-                className="px-2 py-1 rounded bg-slate-700/50 text-white text-xs border border-slate-600 focus:border-green-500 focus:outline-none"
+                className="px-1.5 md:px-2 py-1 rounded bg-slate-700/50 text-white text-[10px] md:text-xs border border-slate-600 focus:border-green-500 focus:outline-none"
               >
                 <option value="1">Januari</option>
                 <option value="2">Februari</option>
@@ -452,7 +461,7 @@ function Dashboard() {
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                className="px-2 py-1 rounded bg-slate-700/50 text-white text-xs border border-slate-600 focus:border-green-500 focus:outline-none"
+                className="px-1.5 md:px-2 py-1 rounded bg-slate-700/50 text-white text-[10px] md:text-xs border border-slate-600 focus:border-green-500 focus:outline-none"
               >
                 {[2022, 2023, 2024, 2025].map(year => (
                   <option key={year} value={year}>{year}</option>
@@ -462,12 +471,12 @@ function Dashboard() {
           )}
           
           {filter === 'yearly' && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400">Tahun:</span>
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              <span className="text-[10px] md:text-xs text-slate-400 shrink-0">Tahun:</span>
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                className="px-2 py-1 rounded bg-slate-700/50 text-white text-xs border border-slate-600 focus:border-amber-500 focus:outline-none"
+                className="px-1.5 md:px-2 py-1 rounded bg-slate-700/50 text-white text-[10px] md:text-xs border border-slate-600 focus:border-amber-500 focus:outline-none flex-1 md:flex-initial"
               >
                 {[2022, 2023, 2024, 2025].map(year => (
                   <option key={year} value={year}>{year}</option>
@@ -482,43 +491,43 @@ function Dashboard() {
         </div>
 
         {/* Stats Section */}
-        <div className="flex gap-1.5 lg:gap-3 overflow-x-auto w-full lg:w-auto pb-1 lg:pb-0 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent px-3 py-2">
+        <div className="grid grid-cols-2 md:flex gap-1.5 lg:gap-3 w-full px-2 md:px-3 py-2">
           {loading ? (
-            <div className="flex-1 flex items-center justify-center py-4">
+            <div className="col-span-2 flex items-center justify-center py-4">
               <div className="relative">
-                <div className="w-12 h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
-                <Swords className="w-6 h-6 text-orange-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                <div className="w-10 h-10 md:w-12 md:h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+                <Swords className="w-5 h-5 md:w-6 md:h-6 text-orange-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
               </div>
             </div>
           ) : (
             <>
               {/* Sisa Hari */}
-              <div className="bg-gradient-to-br from-orange-500/20 to-red-600/20 backdrop-blur-sm border border-orange-500/50 rounded-lg px-2 lg:px-3 py-1 lg:py-1.5 shadow-lg shrink-0">
-                <p className="text-[9px] lg:text-[10px] text-orange-400 font-black flex items-center gap-1 whitespace-nowrap">
-                  <Flame className="w-2.5 h-2.5 lg:w-3 lg:h-3" /> SISA HARI
+              <div className="bg-gradient-to-br from-orange-500/20 to-red-600/20 backdrop-blur-sm border border-orange-500/50 rounded-lg px-2 lg:px-3 py-1 lg:py-1.5 shadow-lg">
+                <p className="text-[8px] md:text-[9px] lg:text-[10px] text-orange-400 font-black flex items-center gap-1 whitespace-nowrap">
+                  <Flame className="w-2 h-2 md:w-2.5 md:h-2.5 lg:w-3 lg:h-3" /> SISA HARI
                 </p>
-                <p className="text-base lg:text-xl font-black text-orange-300 drop-shadow-lg">{remaining}</p>
+                <p className="text-sm md:text-base lg:text-xl font-black text-orange-300 drop-shadow-lg">{remaining}</p>
               </div>
 
           {/* Total Revenue (based on filter) */}
-          <div className={`backdrop-blur-sm border rounded-lg px-2 lg:px-3 py-1 lg:py-1.5 shadow-lg shrink-0 ${
+          <div className={`backdrop-blur-sm border rounded-lg px-2 lg:px-3 py-1 lg:py-1.5 shadow-lg ${
             filter === 'daily' ? 'bg-gradient-to-br from-blue-500/20 to-cyan-600/20 border-blue-500/50' :
             filter === 'weekly' ? 'bg-gradient-to-br from-purple-500/20 to-violet-600/20 border-purple-500/50' :
             filter === 'monthly' ? 'bg-gradient-to-br from-green-500/20 to-emerald-600/20 border-green-500/50' :
             'bg-gradient-to-br from-amber-500/20 to-yellow-600/20 border-amber-500/50'
           }`}>
-            <p className={`text-[9px] lg:text-[10px] font-black flex items-center gap-1 whitespace-nowrap ${
+            <p className={`text-[8px] md:text-[9px] lg:text-[10px] font-black flex items-center gap-1 whitespace-nowrap ${
               filter === 'daily' ? 'text-blue-400' :
               filter === 'weekly' ? 'text-purple-400' :
               filter === 'monthly' ? 'text-green-400' :
               'text-amber-400'
             }`}>
-              {filter === 'daily' && <><Zap className="w-2.5 h-2.5 lg:w-3 lg:h-3" /> HARI INI</>}
-              {filter === 'weekly' && <><TrendingUp className="w-2.5 h-2.5 lg:w-3 lg:h-3" /> MINGGU INI</>}
-              {filter === 'monthly' && <><Target className="w-2.5 h-2.5 lg:w-3 lg:h-3" /> BULAN INI</>}
-              {filter === 'yearly' && <><Trophy className="w-2.5 h-2.5 lg:w-3 lg:h-3" /> TAHUN INI</>}
+              {filter === 'daily' && <><Zap className="w-2 h-2 md:w-2.5 md:h-2.5 lg:w-3 lg:h-3" /> HARI</>}
+              {filter === 'weekly' && <><TrendingUp className="w-2 h-2 md:w-2.5 md:h-2.5 lg:w-3 lg:h-3" /> MINGGU</>}
+              {filter === 'monthly' && <><Target className="w-2 h-2 md:w-2.5 md:h-2.5 lg:w-3 lg:h-3" /> BULAN</>}
+              {filter === 'yearly' && <><Trophy className="w-2 h-2 md:w-2.5 md:h-2.5 lg:w-3 lg:h-3" /> TAHUN</>}
             </p>
-            <p className={`text-xs lg:text-sm font-black drop-shadow-lg whitespace-nowrap ${
+            <p className={`text-[10px] md:text-xs lg:text-sm font-black drop-shadow-lg whitespace-nowrap ${
               filter === 'daily' ? 'text-blue-300' :
               filter === 'weekly' ? 'text-purple-300' :
               filter === 'monthly' ? 'text-green-300' :
@@ -529,19 +538,19 @@ function Dashboard() {
           </div>
 
           {/* On Target */}
-          <div className="bg-gradient-to-br from-amber-500/20 to-yellow-600/20 backdrop-blur-sm border border-amber-500/50 rounded-lg px-2 lg:px-3 py-1 lg:py-1.5 shadow-lg shrink-0">
-            <p className="text-[9px] lg:text-[10px] text-amber-400 font-black flex items-center gap-1 whitespace-nowrap">
-              👍 TARGET HIJAU
+          <div className="bg-gradient-to-br from-amber-500/20 to-yellow-600/20 backdrop-blur-sm border border-amber-500/50 rounded-lg px-2 lg:px-3 py-1 lg:py-1.5 shadow-lg">
+            <p className="text-[8px] md:text-[9px] lg:text-[10px] text-amber-400 font-black flex items-center gap-1 whitespace-nowrap">
+              👍 HIJAU
             </p>
-            <p className="text-base lg:text-xl font-black text-amber-300 drop-shadow-lg">{onTargetCount}<span className="text-xs lg:text-sm text-amber-400/70">/{leaderboard.length}</span></p>
+            <p className="text-sm md:text-base lg:text-xl font-black text-amber-300 drop-shadow-lg">{onTargetCount}<span className="text-[10px] md:text-xs lg:text-sm text-amber-400/70">/{leaderboard.length}</span></p>
           </div>
 
           {/* Live Time */}
-          <div className="bg-gradient-to-br from-violet-500/20 to-purple-600/20 backdrop-blur-sm border border-violet-500/50 rounded-lg px-2 lg:px-3 py-1 lg:py-1.5 shadow-lg shrink-0">
-            <p className="text-[9px] lg:text-[10px] text-violet-400 font-black flex items-center gap-1 whitespace-nowrap">
-              <Clock className="w-2.5 h-2.5 lg:w-3 lg:h-3 animate-pulse" /> LIVE
+          <div className="bg-gradient-to-br from-violet-500/20 to-purple-600/20 backdrop-blur-sm border border-violet-500/50 rounded-lg px-2 lg:px-3 py-1 lg:py-1.5 shadow-lg">
+            <p className="text-[8px] md:text-[9px] lg:text-[10px] text-violet-400 font-black flex items-center gap-1 whitespace-nowrap">
+              <Clock className="w-2 h-2 md:w-2.5 md:h-2.5 lg:w-3 lg:h-3 animate-pulse" /> LIVE
             </p>
-            <p className="text-sm lg:text-base font-mono font-black text-green-400 drop-shadow-lg">
+            <p className="text-xs md:text-sm lg:text-base font-mono font-black text-green-400 drop-shadow-lg">
               {lastUpdated.toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'})}
             </p>
           </div>
@@ -621,32 +630,33 @@ function Dashboard() {
         )}
       </main>
 
-      {/* FOOTER */}      <footer className="h-8 shrink-0 flex items-center justify-between px-4 bg-gradient-to-r from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-sm border-t-2 border-orange-500/30 relative z-10 shadow-lg shadow-black/50">
-        <div className="flex gap-6 text-[11px] text-slate-300 font-semibold">
-          <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 bg-gradient-to-br from-green-400 to-green-600 rounded shadow-lg shadow-green-500/50" />
-            ≥80% Target {filter === 'daily' ? 'Harian' : filter === 'weekly' ? 'Mingguan' : filter === 'monthly' ? 'Bulanan' : 'Tahunan'}
+      {/* FOOTER */}
+      <footer className="h-auto md:h-8 shrink-0 flex flex-col md:flex-row items-center justify-between px-2 md:px-4 py-2 md:py-0 gap-2 md:gap-0 bg-gradient-to-r from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-sm border-t-2 border-orange-500/30 relative z-10 shadow-lg shadow-black/50">
+        <div className="flex flex-wrap gap-2 md:gap-6 text-[8px] md:text-[11px] text-slate-300 font-semibold justify-center md:justify-start">
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 md:w-3 md:h-3 bg-gradient-to-br from-green-400 to-green-600 rounded shadow-lg shadow-green-500/50" />
+            ≥80%
           </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded shadow-lg shadow-yellow-500/50" />
-            70-79% Target Harian
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 md:w-3 md:h-3 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded shadow-lg shadow-yellow-500/50" />
+            70-79%
           </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 bg-gradient-to-br from-red-400 to-red-600 rounded shadow-lg shadow-red-500/50" />
-            &lt;70% Target Harian
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 md:w-3 md:h-3 bg-gradient-to-br from-red-400 to-red-600 rounded shadow-lg shadow-red-500/50" />
+            &lt;70%
           </span>
-          <span className="flex items-center gap-1.5">
-            <ShoppingBag className="w-3 h-3 text-blue-400" />
+          <span className="flex items-center gap-1">
+            <ShoppingBag className="w-2 h-2 md:w-3 md:h-3 text-blue-400" />
             Produk
           </span>
-          <span className="flex items-center gap-1.5">
-            <Sparkles className="w-3 h-3 text-purple-400" />
+          <span className="flex items-center gap-1">
+            <Sparkles className="w-2 h-2 md:w-3 md:h-3 text-purple-400" />
             Treatment
           </span>
         </div>
-        <p className="text-[11px] text-amber-400 font-bold flex items-center gap-2">
-          <Trophy className="w-4 h-4 text-yellow-400 drop-shadow-lg" /> 
-          <span className="text-slate-300">Hadiah:</span> Uang Tunai • SK Performa • Naik Level 🎁
+        <p className="text-[8px] md:text-[11px] text-amber-400 font-bold flex items-center gap-1 md:gap-2">
+          <Trophy className="w-3 h-3 md:w-4 md:h-4 text-yellow-400 drop-shadow-lg" /> 
+          <span className="text-slate-300 hidden md:inline">Hadiah:</span> Uang Tunai • SK • Naik Level 🎁
         </p>
       </footer>
     </div>
