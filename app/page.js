@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Trophy, TrendingUp, AlertCircle, Zap, Target, Clock, Flame, Swords, Crown, CheckCircle, Skull, ShoppingBag, Sparkles } from 'lucide-react';
 
 // PIC Data - Beauty Center Only
@@ -47,30 +47,29 @@ const formatRupiah = (amount) => {
 };
 
 // Row Component
-const RaceRow = ({ rank, data }) => {
+const RaceRow = ({ rank, data, filter }) => {
   const target = getDailyTarget(data.name);
   const weeklyTarget = getWeeklyTarget(data.name);
   const monthlyTarget = getMonthlyTarget(data.name);
-    // Use 100% as target (not 70%)
-  const dailyThreshold = target;
-  const weeklyThreshold = weeklyTarget;
-  const monthlyThreshold = monthlyTarget;
   
-  // Calculate achievements
-  const dailyAchievement = target > 0 ? Math.round((data.total / target) * 100) : 0;
-  const weeklyAchievement = weeklyTarget > 0 ? Math.round((data.weeklyTotal / weeklyTarget) * 100) : 0;
-  const monthlyAchievement = monthlyTarget > 0 ? Math.round((data.monthlyTotal / monthlyTarget) * 100) : 0;
+  // Get target based on filter
+  let currentTarget = target;
+  if (filter === 'weekly') currentTarget = weeklyTarget;
+  else if (filter === 'monthly') currentTarget = monthlyTarget;
+  else if (filter === 'yearly') currentTarget = monthlyTarget * 12; // Approximate yearly target
   
-  // Bar length based on DAILY achievement (0-100%)
-  // If daily = 0, bar kosong. If daily = 100% target, bar penuh.
-  const percent = Math.min(dailyAchievement, 100);
+  // Calculate achievement
+  const achievement = currentTarget > 0 ? Math.round((data.total / currentTarget) * 100) : 0;
   
-  // Bar color based on DAILY achievement only
+  // Bar length based on achievement (0-100%)
+  const percent = Math.min(achievement, 100);
+  
+  // Bar color based on achievement
   // Green: >=80%, Yellow: 70-79%, Red: <70%
   let barColor = 'red'; // default
-  if (dailyAchievement >= 80) {
+  if (achievement >= 80) {
     barColor = 'green';
-  } else if (dailyAchievement >= 70) {
+  } else if (achievement >= 70) {
     barColor = 'yellow';
   }
   
@@ -124,30 +123,30 @@ const RaceRow = ({ rank, data }) => {
             <p className="text-amber-400 text-xs font-semibold mt-1">👤 {pic}</p>
           </div>
 
-          {/* Daily Target */}
-          <div className="flex flex-col items-center shrink-0 w-[200px]">
+          {/* Main Stats - Single column based on filter */}
+          <div className="flex flex-col items-center shrink-0 w-[220px]">
             <div className="flex items-center gap-2">
-              {dailyAchievement >= 80 ? (
+              {achievement >= 80 ? (
                 <span className="text-2xl drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]">👍</span>
-              ) : dailyAchievement >= 70 ? (
+              ) : achievement >= 70 ? (
                 <CheckCircle className="w-5 h-5 text-yellow-400 drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]" />
               ) : (
                 <Skull className="w-5 h-5 text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
               )}
               <div className="text-right">
                 <p className={`text-sm font-bold leading-tight ${
-                  dailyAchievement >= 80 ? 'text-green-400' : 
-                  dailyAchievement >= 70 ? 'text-yellow-400' : 
+                  achievement >= 80 ? 'text-green-400' : 
+                  achievement >= 70 ? 'text-yellow-400' : 
                   'text-red-400'
                 }`}>
                   {formatRupiah(data.total)}
                 </p>
                 <p className="text-[10px] text-slate-500 leading-tight">
-                  /{formatRupiah(dailyThreshold)}
+                  /{formatRupiah(currentTarget)}
                 </p>
               </div>
             </div>
-            {/* Product & Treatment breakdown for Daily */}
+            {/* Product & Treatment breakdown */}
             <div className="flex gap-3 mt-1">
               <div className="flex items-center gap-1">
                 <ShoppingBag className="w-3 h-3 text-blue-400" />
@@ -162,121 +161,28 @@ const RaceRow = ({ rank, data }) => {
                 </span>
               </div>
             </div>
-            <span className="text-[9px] text-slate-400 font-semibold mt-1">HARI INI</span>
+            <span className="text-[9px] text-slate-400 font-semibold mt-1 uppercase">
+              {filter === 'daily' && 'HARI INI'}
+              {filter === 'weekly' && 'MINGGU INI'}
+              {filter === 'monthly' && 'BULAN INI'}
+              {filter === 'yearly' && 'TAHUN INI'}
+            </span>
           </div>
 
-          {/* Weekly Target */}
-          <div className="flex flex-col items-center shrink-0 w-[200px]">
-            <div className="flex items-center gap-2">
-              {weeklyAchievement >= 80 ? (
-                <span className="text-2xl drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]">👍</span>
-              ) : weeklyAchievement >= 70 ? (
-                <CheckCircle className="w-5 h-5 text-yellow-400 drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]" />
-              ) : (
-                <Skull className="w-5 h-5 text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
-              )}
-              <div className="text-right">
-                <p className={`text-sm font-bold leading-tight ${
-                  weeklyAchievement >= 80 ? 'text-green-400' : 
-                  weeklyAchievement >= 70 ? 'text-yellow-400' : 
-                  'text-red-400'
-                }`}>
-                  {formatRupiah(data.weeklyTotal)}
-                </p>
-                <p className="text-[10px] text-slate-500 leading-tight">
-                  /{formatRupiah(weeklyThreshold)}
-                </p>
-              </div>
-            </div>
-            {/* Product & Treatment breakdown for Weekly */}
-            <div className="flex gap-3 mt-1">
-              <div className="flex items-center gap-1">
-                <ShoppingBag className="w-3 h-3 text-blue-400" />
-                <span className="text-[9px] text-blue-400 font-bold">
-                  {formatRupiah(data.weeklyProductTotal || 0)}
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-purple-400" />
-                <span className="text-[9px] text-purple-400 font-bold">
-                  {formatRupiah(data.weeklyTreatmentTotal || 0)}
-                </span>
-              </div>
-            </div>
-            <span className="text-[9px] text-slate-400 font-semibold mt-1">MINGGU INI</span>
-          </div>
-
-          {/* Monthly Target */}
-          <div className="flex flex-col items-center shrink-0 w-[200px]">
-            <div className="flex items-center gap-2">
-              {monthlyAchievement >= 80 ? (
-                <span className="text-2xl drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]">👍</span>
-              ) : monthlyAchievement >= 70 ? (
-                <CheckCircle className="w-5 h-5 text-yellow-400 drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]" />
-              ) : (
-                <Skull className="w-5 h-5 text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
-              )}
-              <div className="text-right">
-                <p className={`text-sm font-bold leading-tight ${
-                  monthlyAchievement >= 80 ? 'text-green-400' : 
-                  monthlyAchievement >= 70 ? 'text-yellow-400' : 
-                  'text-red-400'
-                }`}>
-                  {formatRupiah(data.monthlyTotal)}
-                </p>
-                <p className="text-[10px] text-slate-500 leading-tight">
-                  /{formatRupiah(monthlyThreshold)}
-                </p>
-              </div>
-            </div>
-            {/* Product & Treatment breakdown for Monthly */}
-            <div className="flex gap-3 mt-1">
-              <div className="flex items-center gap-1">
-                <ShoppingBag className="w-3 h-3 text-blue-400" />
-                <span className="text-[9px] text-blue-400 font-bold">
-                  {formatRupiah(data.monthlyProductTotal || 0)}
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-purple-400" />
-                <span className="text-[9px] text-purple-400 font-bold">
-                  {formatRupiah(data.monthlyTreatmentTotal || 0)}
-                </span>
-              </div>
-            </div>
-            <span className="text-[9px] text-slate-400 font-semibold mt-1">BULAN INI</span>
-          </div>
-
-          {/* Achievement Badges - 3 columns */}
+          {/* Achievement Badge */}
           <div className="flex flex-col gap-1 shrink-0">
-            {/* Daily Achievement */}
             <div className="flex items-center gap-2">
-              <span className="text-[9px] text-slate-400 font-bold w-14">Harian:</span>
+              <span className="text-[9px] text-slate-400 font-bold w-16 uppercase">
+                {filter === 'daily' && 'Harian:'}
+                {filter === 'weekly' && 'Mingguan:'}
+                {filter === 'monthly' && 'Bulanan:'}
+                {filter === 'yearly' && 'Tahunan:'}
+              </span>
               <div className={`px-2 py-0.5 rounded text-[10px] font-black shadow-md
-                ${dailyAchievement >= 80 ? 'bg-gradient-to-r from-green-500 to-green-600 text-white' : 
-                  dailyAchievement >= 70 ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-black' : 
+                ${achievement >= 80 ? 'bg-gradient-to-r from-green-500 to-green-600 text-white' : 
+                  achievement >= 70 ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-black' : 
                   'bg-gradient-to-r from-red-500 to-red-600 text-white'}`}>
-                {dailyAchievement}%
-              </div>
-            </div>
-            {/* Weekly Achievement */}
-            <div className="flex items-center gap-2">
-              <span className="text-[9px] text-slate-400 font-bold w-14">Mingguan:</span>
-              <div className={`px-2 py-0.5 rounded text-[10px] font-black shadow-md
-                ${weeklyAchievement >= 80 ? 'bg-gradient-to-r from-green-500 to-green-600 text-white' : 
-                  weeklyAchievement >= 70 ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-black' : 
-                  'bg-gradient-to-r from-red-500 to-red-600 text-white'}`}>
-                {weeklyAchievement}%
-              </div>
-            </div>
-            {/* Monthly Achievement */}
-            <div className="flex items-center gap-2">
-              <span className="text-[9px] text-slate-400 font-bold w-14">Bulanan:</span>
-              <div className={`px-2 py-0.5 rounded text-[10px] font-black shadow-md
-                ${monthlyAchievement >= 80 ? 'bg-gradient-to-r from-green-500 to-green-600 text-white' : 
-                  monthlyAchievement >= 70 ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-black' : 
-                  'bg-gradient-to-r from-red-500 to-red-600 text-white'}`}>
-                {monthlyAchievement}%
+                {achievement}%
               </div>
             </div>
           </div>
@@ -301,10 +207,31 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [filter, setFilter] = useState('daily'); // daily, weekly, monthly, yearly
+  
+  // Date/Period selectors
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]); // For daily
+  const [selectedWeek, setSelectedWeek] = useState(1); // Week 1-4
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // 1-12
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // 2022-current
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
+    setLoading(true); // Show loading when fetching starts
     try {
-      const res = await fetch('/api/sales');
+      let url = `/api/sales?filter=${filter}`;
+      
+      // Add period parameters based on filter
+      if (filter === 'daily') {
+        url += `&date=${selectedDate}`;
+      } else if (filter === 'weekly') {
+        url += `&week=${selectedWeek}&year=${selectedYear}`;
+      } else if (filter === 'monthly') {
+        url += `&month=${selectedMonth}&year=${selectedYear}`;
+      } else if (filter === 'yearly') {
+        url += `&year=${selectedYear}`;
+      }
+      
+      const res = await fetch(url);
       if (!res.ok) throw new Error('API request failed');
       const data = await res.json();
       setLeaderboard(data);
@@ -316,22 +243,24 @@ function Dashboard() {
       setLoading(false);
       setError(true);
     }
-  };
+  }, [filter, selectedDate, selectedWeek, selectedMonth, selectedYear]);
+  
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchData]);
 
-  const totalDailyRevenue = leaderboard.reduce((s, c) => s + c.total, 0);
-  const totalWeeklyRevenue = leaderboard.reduce((s, c) => s + c.weeklyTotal, 0);
-  const totalMonthlyRevenue = leaderboard.reduce((s, c) => s + c.monthlyTotal, 0);
+  const totalRevenue = loading ? 0 : leaderboard.reduce((s, c) => s + c.total, 0);
   
-  // On target count based on monthly achievement >= 80% (green)
-  const onTargetCount = leaderboard.filter(c => {
-    const monthlyTarget = getMonthlyTarget(c.name);
-    const monthlyAchievement = monthlyTarget > 0 ? Math.round((c.monthlyTotal / monthlyTarget) * 100) : 0;
-    return monthlyAchievement >= 80;
+  // On target count based on achievement >= 80% (green)
+  const onTargetCount = loading ? 0 : leaderboard.filter(c => {
+    const target = filter === 'daily' ? getDailyTarget(c.name) :
+                   filter === 'weekly' ? getWeeklyTarget(c.name) :
+                   filter === 'monthly' ? getMonthlyTarget(c.name) :
+                   getMonthlyTarget(c.name) * 12; // yearly
+    const achievement = target > 0 ? Math.round((c.total / target) * 100) : 0;
+    return achievement >= 80;
   }).length;
   
   const remaining = getRemainingDays();
@@ -355,45 +284,215 @@ function Dashboard() {
           <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-orange-500 via-red-600 to-orange-700 rounded-xl flex items-center justify-center shadow-lg shadow-orange-600/50 animate-pulse shrink-0">
             <Swords className="w-5 h-5 lg:w-7 lg:h-7 text-white drop-shadow-lg" />
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <h1 className="text-base lg:text-xl font-black bg-gradient-to-r from-orange-400 via-red-500 to-orange-400 bg-clip-text text-transparent drop-shadow-lg">
               BATTLE BUSINESS GAME
             </h1>
             <p className="text-[9px] lg:text-[11px] text-slate-400 font-semibold truncate">🏆 Program 90 Hari • Bu Putri • {currentMonth}</p>
           </div>
+          
+          {/* Filter Buttons */}
+          <div className="flex gap-1 shrink-0">
+            <button
+              onClick={() => setFilter('daily')}
+              className={`px-2 lg:px-3 py-1 rounded-lg text-[10px] lg:text-xs font-bold transition-all ${
+                filter === 'daily' 
+                  ? 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white shadow-lg shadow-blue-500/50' 
+                  : 'bg-slate-700/50 text-slate-400 hover:bg-slate-600/50'
+              }`}
+            >
+              HARIAN
+            </button>
+            <button
+              onClick={() => setFilter('weekly')}
+              className={`px-2 lg:px-3 py-1 rounded-lg text-[10px] lg:text-xs font-bold transition-all ${
+                filter === 'weekly' 
+                  ? 'bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-lg shadow-purple-500/50' 
+                  : 'bg-slate-700/50 text-slate-400 hover:bg-slate-600/50'
+              }`}
+            >
+              MINGGUAN
+            </button>
+            <button
+              onClick={() => setFilter('monthly')}
+              className={`px-2 lg:px-3 py-1 rounded-lg text-[10px] lg:text-xs font-bold transition-all ${
+                filter === 'monthly' 
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/50' 
+                  : 'bg-slate-700/50 text-slate-400 hover:bg-slate-600/50'
+              }`}
+            >
+              BULANAN
+            </button>
+            <button
+              onClick={() => setFilter('yearly')}
+              className={`px-2 lg:px-3 py-1 rounded-lg text-[10px] lg:text-xs font-bold transition-all ${
+                filter === 'yearly' 
+                  ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white shadow-lg shadow-amber-500/50' 
+                  : 'bg-slate-700/50 text-slate-400 hover:bg-slate-600/50'
+              }`}
+            >
+              TAHUNAN
+            </button>
+          </div>
         </div>
 
-        <div className="flex gap-1.5 lg:gap-3 overflow-x-auto w-full lg:w-auto pb-1 lg:pb-0 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
-          {/* Sisa Hari */}
-          <div className="bg-gradient-to-br from-orange-500/20 to-red-600/20 backdrop-blur-sm border border-orange-500/50 rounded-lg px-2 lg:px-3 py-1 lg:py-1.5 shadow-lg shrink-0">
-            <p className="text-[9px] lg:text-[10px] text-orange-400 font-black flex items-center gap-1 whitespace-nowrap">
-              <Flame className="w-2.5 h-2.5 lg:w-3 lg:h-3" /> SISA HARI
-            </p>
-            <p className="text-base lg:text-xl font-black text-orange-300 drop-shadow-lg">{remaining}</p>
-          </div>
+        {/* Period Selector */}
+        <div className="flex items-center gap-2 px-3 py-2">
+          {filter === 'daily' && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400">Tanggal:</span>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="px-2 py-1 rounded bg-slate-700/50 text-white text-xs border border-slate-600 focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+          )}
+          
+          {filter === 'weekly' && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400">Minggu:</span>
+              <select
+                value={selectedWeek}
+                onChange={(e) => setSelectedWeek(parseInt(e.target.value))}
+                className="px-2 py-1 rounded bg-slate-700/50 text-white text-xs border border-slate-600 focus:border-purple-500 focus:outline-none"
+              >
+                <option value="1">Minggu 1</option>
+                <option value="2">Minggu 2</option>
+                <option value="3">Minggu 3</option>
+                <option value="4">Minggu 4</option>
+              </select>
+              <span className="text-xs text-slate-400">Bulan:</span>
+              <select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+                className="px-2 py-1 rounded bg-slate-700/50 text-white text-xs border border-slate-600 focus:border-purple-500 focus:outline-none"
+              >
+                <option value="1">Januari</option>
+                <option value="2">Februari</option>
+                <option value="3">Maret</option>
+                <option value="4">April</option>
+                <option value="5">Mei</option>
+                <option value="6">Juni</option>
+                <option value="7">Juli</option>
+                <option value="8">Agustus</option>
+                <option value="9">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+              </select>
+              <span className="text-xs text-slate-400">Tahun:</span>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                className="px-2 py-1 rounded bg-slate-700/50 text-white text-xs border border-slate-600 focus:border-purple-500 focus:outline-none"
+              >
+                {[2022, 2023, 2024, 2025].map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+            </div>
+          )}
+          
+          {filter === 'monthly' && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400">Bulan:</span>
+              <select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+                className="px-2 py-1 rounded bg-slate-700/50 text-white text-xs border border-slate-600 focus:border-green-500 focus:outline-none"
+              >
+                <option value="1">Januari</option>
+                <option value="2">Februari</option>
+                <option value="3">Maret</option>
+                <option value="4">April</option>
+                <option value="5">Mei</option>
+                <option value="6">Juni</option>
+                <option value="7">Juli</option>
+                <option value="8">Agustus</option>
+                <option value="9">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+              </select>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                className="px-2 py-1 rounded bg-slate-700/50 text-white text-xs border border-slate-600 focus:border-green-500 focus:outline-none"
+              >
+                {[2022, 2023, 2024, 2025].map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+            </div>
+          )}
+          
+          {filter === 'yearly' && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400">Tahun:</span>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                className="px-2 py-1 rounded bg-slate-700/50 text-white text-xs border border-slate-600 focus:border-amber-500 focus:outline-none"
+              >
+                {[2022, 2023, 2024, 2025].map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
 
-          {/* Hari Ini */}
-          <div className="bg-gradient-to-br from-blue-500/20 to-cyan-600/20 backdrop-blur-sm border border-blue-500/50 rounded-lg px-2 lg:px-3 py-1 lg:py-1.5 shadow-lg shrink-0">
-            <p className="text-[9px] lg:text-[10px] text-blue-400 font-black flex items-center gap-1 whitespace-nowrap">
-              <Zap className="w-2.5 h-2.5 lg:w-3 lg:h-3" /> HARI INI
-            </p>
-            <p className="text-xs lg:text-sm font-black text-blue-300 drop-shadow-lg whitespace-nowrap">Rp {formatRupiah(totalDailyRevenue)}</p>
-          </div>
+        <div className="px-4 pb-2">
+          <div className="h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
+        </div>
 
-          {/* Minggu Ini */}
-          <div className="bg-gradient-to-br from-purple-500/20 to-violet-600/20 backdrop-blur-sm border border-purple-500/50 rounded-lg px-2 lg:px-3 py-1 lg:py-1.5 shadow-lg shrink-0">
-            <p className="text-[9px] lg:text-[10px] text-purple-400 font-black flex items-center gap-1 whitespace-nowrap">
-              <TrendingUp className="w-2.5 h-2.5 lg:w-3 lg:h-3" /> MINGGU INI
-            </p>
-            <p className="text-xs lg:text-sm font-black text-purple-300 drop-shadow-lg whitespace-nowrap">Rp {formatRupiah(totalWeeklyRevenue)}</p>
-          </div>
+        {/* Stats Section */}
+        <div className="flex gap-1.5 lg:gap-3 overflow-x-auto w-full lg:w-auto pb-1 lg:pb-0 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent px-3 py-2">
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center py-4">
+              <div className="relative">
+                <div className="w-12 h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+                <Swords className="w-6 h-6 text-orange-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Sisa Hari */}
+              <div className="bg-gradient-to-br from-orange-500/20 to-red-600/20 backdrop-blur-sm border border-orange-500/50 rounded-lg px-2 lg:px-3 py-1 lg:py-1.5 shadow-lg shrink-0">
+                <p className="text-[9px] lg:text-[10px] text-orange-400 font-black flex items-center gap-1 whitespace-nowrap">
+                  <Flame className="w-2.5 h-2.5 lg:w-3 lg:h-3" /> SISA HARI
+                </p>
+                <p className="text-base lg:text-xl font-black text-orange-300 drop-shadow-lg">{remaining}</p>
+              </div>
 
-          {/* Bulan Ini */}
-          <div className="bg-gradient-to-br from-green-500/20 to-emerald-600/20 backdrop-blur-sm border border-green-500/50 rounded-lg px-2 lg:px-3 py-1 lg:py-1.5 shadow-lg shrink-0">
-            <p className="text-[9px] lg:text-[10px] text-green-400 font-black flex items-center gap-1 whitespace-nowrap">
-              <Target className="w-2.5 h-2.5 lg:w-3 lg:h-3" /> BULAN INI
+          {/* Total Revenue (based on filter) */}
+          <div className={`backdrop-blur-sm border rounded-lg px-2 lg:px-3 py-1 lg:py-1.5 shadow-lg shrink-0 ${
+            filter === 'daily' ? 'bg-gradient-to-br from-blue-500/20 to-cyan-600/20 border-blue-500/50' :
+            filter === 'weekly' ? 'bg-gradient-to-br from-purple-500/20 to-violet-600/20 border-purple-500/50' :
+            filter === 'monthly' ? 'bg-gradient-to-br from-green-500/20 to-emerald-600/20 border-green-500/50' :
+            'bg-gradient-to-br from-amber-500/20 to-yellow-600/20 border-amber-500/50'
+          }`}>
+            <p className={`text-[9px] lg:text-[10px] font-black flex items-center gap-1 whitespace-nowrap ${
+              filter === 'daily' ? 'text-blue-400' :
+              filter === 'weekly' ? 'text-purple-400' :
+              filter === 'monthly' ? 'text-green-400' :
+              'text-amber-400'
+            }`}>
+              {filter === 'daily' && <><Zap className="w-2.5 h-2.5 lg:w-3 lg:h-3" /> HARI INI</>}
+              {filter === 'weekly' && <><TrendingUp className="w-2.5 h-2.5 lg:w-3 lg:h-3" /> MINGGU INI</>}
+              {filter === 'monthly' && <><Target className="w-2.5 h-2.5 lg:w-3 lg:h-3" /> BULAN INI</>}
+              {filter === 'yearly' && <><Trophy className="w-2.5 h-2.5 lg:w-3 lg:h-3" /> TAHUN INI</>}
             </p>
-            <p className="text-xs lg:text-sm font-black text-green-300 drop-shadow-lg whitespace-nowrap">Rp {formatRupiah(totalMonthlyRevenue)}</p>
+            <p className={`text-xs lg:text-sm font-black drop-shadow-lg whitespace-nowrap ${
+              filter === 'daily' ? 'text-blue-300' :
+              filter === 'weekly' ? 'text-purple-300' :
+              filter === 'monthly' ? 'text-green-300' :
+              'text-amber-300'
+            }`}>
+              Rp {formatRupiah(totalRevenue)}
+            </p>
           </div>
 
           {/* On Target */}
@@ -413,6 +512,8 @@ function Dashboard() {
               {lastUpdated.toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'})}
             </p>
           </div>
+            </>
+          )}
         </div>
       </header>
 
@@ -444,6 +545,7 @@ function Dashboard() {
               key={clinic.name} 
               rank={i+1} 
               data={clinic}
+              filter={filter}
             />
           ))
         )}
@@ -453,7 +555,7 @@ function Dashboard() {
         <div className="flex gap-6 text-[11px] text-slate-300 font-semibold">
           <span className="flex items-center gap-1.5">
             <span className="w-3 h-3 bg-gradient-to-br from-green-400 to-green-600 rounded shadow-lg shadow-green-500/50" />
-            ≥80% Target Harian
+            ≥80% Target {filter === 'daily' ? 'Harian' : filter === 'weekly' ? 'Mingguan' : filter === 'monthly' ? 'Bulanan' : 'Tahunan'}
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-3 h-3 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded shadow-lg shadow-yellow-500/50" />
