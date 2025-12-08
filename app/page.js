@@ -209,6 +209,11 @@ function Dashboard() {
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const [filter, setFilter] = useState('daily'); // daily, weekly, monthly, yearly
   
+  // Loading progress
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [currentClinic, setCurrentClinic] = useState('');
+  const [totalClinics, setTotalClinics] = useState(0);
+  
   // Date/Period selectors
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]); // For daily
   const [selectedWeek, setSelectedWeek] = useState(1); // Week 1-4
@@ -216,15 +221,19 @@ function Dashboard() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // 2022-current
 
   const fetchData = useCallback(async () => {
-    setLoading(true); // Show loading when fetching starts
+    setLoading(true);
+    setLoadingProgress(0);
+    setCurrentClinic('');
+    setError(false);
+    
     try {
-      let url = `/api/sales?filter=${filter}`;
+      let url = `/api/sales-progress?filter=${filter}`;
       
       // Add period parameters based on filter
       if (filter === 'daily') {
         url += `&date=${selectedDate}`;
       } else if (filter === 'weekly') {
-        url += `&week=${selectedWeek}&year=${selectedYear}`;
+        url += `&week=${selectedWeek}&month=${selectedMonth}&year=${selectedYear}`;
       } else if (filter === 'monthly') {
         url += `&month=${selectedMonth}&year=${selectedYear}`;
       } else if (filter === 'yearly') {
@@ -233,11 +242,35 @@ function Dashboard() {
       
       const res = await fetch(url);
       if (!res.ok) throw new Error('API request failed');
-      const data = await res.json();
-      setLeaderboard(data);
-      setLoading(false);
-      setError(false);
-      setLastUpdated(new Date());
+      
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = JSON.parse(line.slice(6));
+            
+            if (data.type === 'progress') {
+              setCurrentClinic(data.clinic);
+              setLoadingProgress(data.progress);
+              setTotalClinics(data.total);
+            } else if (data.type === 'complete') {
+              setLeaderboard(data.data);
+              setLoading(false);
+              setLastUpdated(new Date());
+            }
+          }
+        }
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
       setLoading(false);
@@ -521,9 +554,46 @@ function Dashboard() {
       <main className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col py-2 gap-1 relative z-10 px-2">
         {loading ? (
           <div className="flex-1 flex items-center justify-center">
-            <div className="relative">
-              <div className="w-16 h-16 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
-              <Swords className="w-8 h-8 text-orange-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+            <div className="w-full max-w-2xl px-4">
+              {/* Progress Bar */}
+              <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700/50 backdrop-blur-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="relative">
+                    <div className="w-12 h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+                    <Swords className="w-6 h-6 text-orange-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-black text-white mb-1">Memuat Data Sales...</h3>
+                    {currentClinic && (
+                      <p className="text-sm text-slate-400">
+                        📍 Fetching: <span className="text-orange-400 font-semibold">{currentClinic}</span>
+                      </p>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Progress Bar */}
+                <div className="relative">
+                  <div className="w-full h-4 bg-slate-900/50 rounded-full overflow-hidden border border-slate-700/50">
+                    <div 
+                      className="h-full bg-gradient-to-r from-orange-500 via-red-500 to-orange-600 transition-all duration-300 ease-out relative"
+                      style={{ width: `${loadingProgress}%` }}
+                    >
+                      <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                    </div>
+                  </div>
+                  <div className="flex justify-between mt-2 text-xs">
+                    <span className="text-slate-400 font-semibold">
+                      {Math.round(loadingProgress)}% Complete
+                    </span>
+                    {totalClinics > 0 && (
+                      <span className="text-slate-400 font-semibold">
+                        {Math.ceil((loadingProgress / 100) * totalClinics)} / {totalClinics} Klinik
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         ) : error ? (
