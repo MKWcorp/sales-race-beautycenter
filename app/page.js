@@ -289,7 +289,7 @@ function Dashboard() {
   
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 30000);
+    const interval = setInterval(fetchData, 1800000); // 30 minutes
     return () => clearInterval(interval);
   }, [fetchData]);
 
