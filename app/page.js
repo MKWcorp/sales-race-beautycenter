@@ -293,10 +293,13 @@ function Dashboard() {
     return () => clearInterval(interval);
   }, [fetchData]);
 
-  const totalRevenue = loading ? 0 : leaderboard.reduce((s, c) => s + c.total, 0);
+  // Sort leaderboard by total revenue (highest first)
+  const sortedLeaderboard = loading ? [] : [...leaderboard].sort((a, b) => b.total - a.total);
+
+  const totalRevenue = loading ? 0 : sortedLeaderboard.reduce((s, c) => s + c.total, 0);
   
   // On target count based on achievement >= 80% (green)
-  const onTargetCount = loading ? 0 : leaderboard.filter(c => {
+  const onTargetCount = loading ? 0 : sortedLeaderboard.filter(c => {
     const target = filter === 'daily' ? getDailyTarget(c.name) :
                    filter === 'weekly' ? getWeeklyTarget(c.name) :
                    filter === 'monthly' ? getMonthlyTarget(c.name) :
@@ -619,7 +622,7 @@ function Dashboard() {
               </button>
             </div>
           </div>        ) : (
-          leaderboard.map((clinic, i) => (
+          sortedLeaderboard.map((clinic, i) => (
             <RaceRow 
               key={clinic.name} 
               rank={i+1} 
