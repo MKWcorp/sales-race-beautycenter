@@ -32,9 +32,9 @@ const MONTHLY_TARGETS = {
 };
 
 const PROGRAM_END = new Date('2026-03-01');
-// November 2025 = 30 hari
-const DAYS_IN_NOVEMBER = 30;
-const getDailyTarget = (name) => Math.round((MONTHLY_TARGETS[name] || 50000000) / DAYS_IN_NOVEMBER);
+// Desember 2025 = 31 hari
+const DAYS_IN_DECEMBER = 31;
+const getDailyTarget = (name) => Math.round((MONTHLY_TARGETS[name] || 50000000) / DAYS_IN_DECEMBER);
 const getWeeklyTarget = (name) => getDailyTarget(name) * 7;
 const getMonthlyTarget = (name) => MONTHLY_TARGETS[name] || 50000000;
 const getPIC = (name) => PIC_DATA[name] || "TBD";
@@ -249,10 +249,10 @@ function Dashboard() {
         url += `&year=${selectedYear}`;
       }
       
-      console.log('Fetching URL:', url);
+      console.log('Mengambil URL:', url);
       
       const res = await fetch(url);
-      if (!res.ok) throw new Error('API request failed');
+      if (!res.ok) throw new Error('Permintaan API gagal');
       
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -283,7 +283,7 @@ function Dashboard() {
         }
       }
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Gagal mengambil data:', error);
       setLoading(false);
       setError(true);
     }
@@ -291,16 +291,16 @@ function Dashboard() {
   
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 1800000); // 30 minutes
+    const interval = setInterval(fetchData, 1800000); // 30 menit
     return () => clearInterval(interval);
   }, [fetchData]);
 
-  // Sort leaderboard by achievement percentage (highest first)
+  // Urutkan papan skor berdasarkan persentase pencapaian (tertinggi pertama)
   const sortedLeaderboard = useMemo(() => {
     if (loading || leaderboard.length === 0) return [];
     
     return [...leaderboard].sort((a, b) => {
-      // Calculate target for each clinic based on current filter
+      // Hitung target untuk setiap klinik berdasarkan filter saat ini
       const targetA = filter === 'daily' ? getDailyTarget(a.name) :
                       filter === 'weekly' ? getWeeklyTarget(a.name) :
                       filter === 'monthly' ? getMonthlyTarget(a.name) :
@@ -309,20 +309,20 @@ function Dashboard() {
       const targetB = filter === 'daily' ? getDailyTarget(b.name) :
                       filter === 'weekly' ? getWeeklyTarget(b.name) :
                       filter === 'monthly' ? getMonthlyTarget(b.name) :
-                      getMonthlyTarget(b.name) * 12; // yearly
+                      getMonthlyTarget(b.name) * 12; // tahunan
       
-      // Calculate achievement percentage
+      // Hitung persentase pencapaian
       const achievementA = targetA > 0 ? (a.total / targetA) * 100 : 0;
       const achievementB = targetB > 0 ? (b.total / targetB) * 100 : 0;
       
-      // Sort by achievement percentage (highest first)
+      // Urutkan berdasarkan persentase pencapaian (tertinggi pertama)
       return achievementB - achievementA;
     });
   }, [leaderboard, loading, filter]);
 
   const totalRevenue = loading ? 0 : sortedLeaderboard.reduce((s, c) => s + c.total, 0);
   
-  // On target count based on achievement >= 80% (green)
+  // Jumlah yang mencapai target berdasarkan pencapaian >= 80% (hijau)
   const onTargetCount = loading ? 0 : sortedLeaderboard.filter(c => {
     const target = filter === 'daily' ? getDailyTarget(c.name) :
                    filter === 'weekly' ? getWeeklyTarget(c.name) :
@@ -334,13 +334,13 @@ function Dashboard() {
   
   const remaining = getRemainingDays();
   
-  // Get current period (month name)
+  // Dapatkan periode saat ini (nama bulan)
   const currentMonth = new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white flex flex-col relative overflow-x-hidden m-0 p-0">
       
-      {/* Background Battle Pattern */}
+      {/* Pola Latar Belakang */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute inset-0" style={{ 
           backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.03) 35px, rgba(255,255,255,.03) 70px)',
@@ -569,7 +569,7 @@ function Dashboard() {
                     <h3 className="text-lg font-black text-white mb-1">Memuat Data Sales...</h3>
                     {currentClinic && (
                       <p className="text-sm text-slate-400">
-                        📍 Fetching: <span className="text-orange-400 font-semibold">{currentClinic}</span>
+                        📍 Mengambil data: <span className="text-orange-400 font-semibold">{currentClinic}</span>
                       </p>
                     )}
                   </div>
@@ -587,7 +587,7 @@ function Dashboard() {
                   </div>
                   <div className="flex justify-between mt-2 text-xs">
                     <span className="text-slate-400 font-semibold">
-                      {Math.round(loadingProgress)}% Complete
+                      {Math.round(loadingProgress)}% Selesai
                     </span>
                     {totalClinics > 0 && (
                       <span className="text-slate-400 font-semibold">
