@@ -17,7 +17,7 @@ const PIC_DATA = {
   "Beauty Center Wates": "TBD", "Wates": "TBD",
 };
 
-// Target Bulanan NOVEMBER 2025 - Beauty Center Only
+// Target Bulanan DESEMBER 2025 - Beauty Center Only
 const MONTHLY_TARGETS = {
   "Beauty Center Kaliurang": 64560000, "Kaliurang": 64560000,
   "Beauty Center Parangtritis": 76597680, "Jl paris Prawirotaman": 76597680,

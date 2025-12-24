@@ -19,7 +19,7 @@ const PIC_DATA = {
   "Klinik DRW Skincare Kutoarjo": "Klinik", "Cinic Kuotarjo": "Klinik",
 };
 
-// Target Bulanan
+// Target Bulanan DESEMBER 2025
 const MONTHLY_TARGETS = {
   "Klinik DRW Skincare Magelang": 124350000, "Clinic magelang": 124350000,
   "Klinik DRW Skincare Purworejo": 321828000, "clinic purworejo": 321828000,
