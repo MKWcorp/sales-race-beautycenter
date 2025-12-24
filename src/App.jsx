@@ -5,7 +5,7 @@ import { getAggregatedData } from './services/api';
 // PIC Data
 const PIC_DATA = {
   "Beauty Center Kaliurang": "Pak Eri", "Kaliurang": "Pak Eri",
-  "Beauty Center Parangtritis": "Bu Hani", "Jl paris Prawirotaman": "Bu Hani",
+  "Beauty Center Parangtritis": "Bu Hani", "Beauty Center Prawirotaman": "Bu Hani",
   "Beauty Center Godean": "Bu Vera", "Godean": "Bu Vera",
   "Beauty Center Kotagede": "Pak Inu", "Kota gede": "Pak Inu",
   "Beauty Center Prambanan": "Bu Ida", "Prambanan": "Bu Ida",
@@ -26,7 +26,7 @@ const MONTHLY_TARGETS = {
   "Klinik DRW Skincare Kutoarjo": 321828000, "Cinic Kuotarjo": 321828000,
   "Rumah Cantik Rajawali": 32650080, "Rumah cantik Rajawali": 32650080,
   "Beauty Center Kaliurang": 64560000, "Kaliurang": 64560000,
-  "Jl paris Prawirotaman": 76597680,
+  "Beauty Center Parangtritis": 76597680, "Beauty Center Prawirotaman": 76597680,
   "Beauty Center Maguwoharjo": 77970480, "Maguwoharjo tajem": 77970480,
   "Beauty Center Kotagede": 69834960, "Kota gede": 69834960,
   "Beauty Center Bantul": 73374040, "bantul": 73374040,
