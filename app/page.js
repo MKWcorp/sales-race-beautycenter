@@ -6,7 +6,7 @@ import { Trophy, TrendingUp, AlertCircle, Zap, Target, Clock, Flame, Swords, Cro
 // PIC Data - Beauty Center Only
 const PIC_DATA = {
   "Beauty Center Kaliurang": "Pak Eri", "Kaliurang": "Pak Eri",
-  "Beauty Center Parangtritis": "Bu Hani", "Jl paris Prawirotaman": "Bu Hani",
+  "Beauty Center Parangtritis": "Bu Hani", "Parangtritis": "Bu Hani",
   "Beauty Center Godean": "Bu Vera", "Godean": "Bu Vera",
   "Beauty Center Kotagede": "Pak Inu", "Kota gede": "Pak Inu",
   "Beauty Center Prambanan": "Bu Ida", "Prambanan": "Bu Ida",
@@ -19,25 +19,48 @@ const PIC_DATA = {
 
 // Target Bulanan DESEMBER 2025 - Beauty Center Only
 const MONTHLY_TARGETS = {
-  "Beauty Center Kaliurang": 64560000, "Kaliurang": 64560000,
-  "Beauty Center Parangtritis": 76597680, "Jl paris Prawirotaman": 76597680,
-  "Beauty Center Godean": 74609760, "Godean": 74609760,
-  "Beauty Center Kotagede": 69834960, "Kota gede": 69834960,
-  "Beauty Center Prambanan": 66057600, "Prambanan": 66057600,
-  "Beauty Center Bantul": 73374040, "bantul": 73374040,
-  "Beauty Center Maguwoharjo": 77970480, "Maguwoharjo tajem": 77970480,
-  "Rumah Cantik Rajawali": 32650080, "Rumah cantik Rajawali": 32650080,
-  "Beauty Center Muntilan": 61705400, "Muntilan": 61705400,
-  "Beauty Center Wates": 69240000, "Wates": 69240000,
+  "Beauty Center Kaliurang": 59100000, "Kaliurang": 59100000,
+  "Beauty Center Parangtritis": 71250000, "Parangtritis": 71250000,
+  "Beauty Center Godean": 69000000, "Godean": 69000000,
+  "Beauty Center Kotagede": 64350000, "Kota gede": 64350000,
+  "Beauty Center Prambanan": 59100000, "Prambanan": 59100000,
+  "Beauty Center Bantul": 69000000, "bantul": 69000000,
+  "Beauty Center Maguwoharjo": 71250000, "Maguwoharjo tajem": 71250000,
+  "Rumah Cantik Rajawali": 24750000, "Rumah cantik Rajawali": 24750000,
+  "Beauty Center Muntilan": 57300000, "Muntilan": 57300000,
+  "Beauty Center Wates": 59100000, "Wates": 59100000,
 };
 
 const PROGRAM_END = new Date('2026-03-01');
 // Desember 2025 = 31 hari
 const DAYS_IN_DECEMBER = 31;
-const getDailyTarget = (name) => Math.round((MONTHLY_TARGETS[name] || 50000000) / DAYS_IN_DECEMBER);
+
+// Name mapping dari API ke Display Name
+const NAME_MAPPING = {
+  "Beauty Center Prawirotaman": "Beauty Center Parangtritis",
+  "Jl paris Prawirotaman": "Beauty Center Parangtritis",
+  "Jln paris Prawirotaman": "Beauty Center Parangtritis",
+  "jl paris Prawirotaman": "Beauty Center Parangtritis",
+  "jln paris Prawirotaman": "Beauty Center Parangtritis",
+  "Jl Paris Prawirotaman": "Beauty Center Parangtritis",
+  "Jln Paris Prawirotaman": "Beauty Center Parangtritis",
+};
+
+const getDisplayName = (name) => NAME_MAPPING[name] || name;
+const getNormalizedName = (name) => NAME_MAPPING[name] || name;
+const getDailyTarget = (name) => {
+  const normalizedName = getNormalizedName(name);
+  return Math.round((MONTHLY_TARGETS[normalizedName] || 50000000) / DAYS_IN_DECEMBER);
+};
 const getWeeklyTarget = (name) => getDailyTarget(name) * 7;
-const getMonthlyTarget = (name) => MONTHLY_TARGETS[name] || 50000000;
-const getPIC = (name) => PIC_DATA[name] || "TBD";
+const getMonthlyTarget = (name) => {
+  const normalizedName = getNormalizedName(name);
+  return MONTHLY_TARGETS[normalizedName] || 50000000;
+};
+const getPIC = (name) => {
+  const normalizedName = getNormalizedName(name);
+  return PIC_DATA[normalizedName] || "TBD";
+};
 const getRemainingDays = () => Math.max(0, Math.ceil((PROGRAM_END - new Date()) / 86400000));
 
 // Format Rupiah normal tanpa sensor
@@ -48,6 +71,13 @@ const formatRupiah = (amount) => {
 
 // Row Component
 const RaceRow = ({ rank, data, filter }) => {
+  // Debug log untuk melihat nama asli dari API
+  if (data.name && (data.name.toLowerCase().includes('paris') || data.name.toLowerCase().includes('prawirotaman'))) {
+    console.log('📍 Original name from API:', data.name);
+    console.log('📍 Display name:', getDisplayName(data.name));
+    console.log('📍 Monthly target:', getMonthlyTarget(data.name));
+  }
+  
   const target = getDailyTarget(data.name);
   const weeklyTarget = getWeeklyTarget(data.name);
   const monthlyTarget = getMonthlyTarget(data.name);
@@ -119,7 +149,7 @@ const RaceRow = ({ rank, data, filter }) => {
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between w-full gap-2 md:gap-3">
           {/* Clinic Info */}
           <div className="flex-shrink-0 w-full md:w-[200px]">
-            <p className="font-black text-sm md:text-base text-white drop-shadow-md truncate leading-tight">{data.name}</p>
+            <p className="font-black text-sm md:text-base text-white drop-shadow-md truncate leading-tight">{getDisplayName(data.name)}</p>
             <p className="text-amber-400 text-[10px] md:text-xs font-semibold mt-0.5 md:mt-1">👤 {pic}</p>
           </div>
 
