@@ -1,0 +1,169 @@
+=== Memulai Analisis Perbandingan Data Settlement vs API POS ===
+    FOKUS: Beauty Center & Rumah Cantik
+
+Parsing data CSV settlement...
+=== Nama cabang di CSV ===
+   - 'Clinic magelang '
+   - 'clinic purworejo'
+   - 'Cinic Kuotarjo '
+   - 'Rumah cantik Rajawali '
+   - 'Kaliurang'
+   - 'Jl paris Prawirotaman '
+   - 'Maguwoharjo tajem'
+   - 'Kota gede'
+   - 'bantul'
+   - 'Prambanan'
+   - 'Godean '
+   - 'Muntilan'
+   - 'Wates'
+
+   Mapping: 'Clinic magelang ' -> 'Klinik DRW Skincare Magelang'
+   Mapping: 'clinic purworejo' -> 'Klinik DRW Skincare Purworejo'
+   Mapping: 'Cinic Kuotarjo ' -> 'Klinik DRW Skincare Kutoarjo'
+   Mapping: 'Rumah cantik Rajawali ' -> 'Rumah Cantik Rajawali'
+   Mapping: 'Kaliurang' -> 'Beauty Center Kaliurang'
+   Mapping: 'Jl paris Prawirotaman ' -> 'Beauty Center Prawirotaman'
+   Mapping: 'Maguwoharjo tajem' -> 'Beauty Center Maguwoharjo'
+   Mapping: 'Kota gede' -> 'Beauty Center Kotagede'
+   Mapping: 'bantul' -> 'Beauty Center Bantul'
+   Mapping: 'Prambanan' -> 'Beauty Center Prambanan'
+   Mapping: 'Godean ' -> 'Beauty Center Godean'
+   Mapping: 'Muntilan' -> 'Beauty Center Muntilan'
+   Mapping: 'Wates' -> 'Beauty Center Wates'
+Berhasil parse 13 cabang dari CSV
+
+>> Mencoba endpoint: https://clinic.beautycenter.id/api/laporan-penjualan-perawatan?dari_tanggal=2025-12-01&sampai_tanggal=2025-12-31
+   Page 1: 15 records
+   Page 2: 15 records
+   Page 3: 15 records
+   Page 4: 15 records
+   Page 5: 15 records
+   Page 6: 15 records
+   Page 7: 15 records
+   Page 8: 15 records
+   Page 9: 15 records
+   Page 10: 15 records
+   Page 11: 15 records
+   Page 12: 15 records
+   Page 13: 15 records
+   Page 14: 15 records
+   Page 15: 15 records
+   Page 16: 15 records
+   Page 17: 15 records
+   Page 18: 15 records
+   Page 19: 15 records
+   Page 20: 15 records
+   Page 21: 15 records
+   Page 22: 15 records
+   Page 23: 15 records
+   Page 24: 15 records
+   Page 25: 15 records
+   Page 26: 15 records
+   Page 27: 15 records
+   Page 28: 15 records
+   Page 29: 15 records
+   Page 30: 15 records
+   Page 31: 15 records
+   Page 32: 15 records
+   Page 33: 15 records
+   Page 34: 15 records
+   Page 35: 15 records
+   Page 36: 15 records
+   Page 37: 15 records
+   Page 38: 15 records
+   Page 39: 15 records
+   Page 40: 15 records
+   Page 41: 15 records
+   Page 42: 15 records
+   Page 43: 15 records
+   Page 44: 15 records
+   Page 45: 15 records
+   Page 46: 15 records
+   Page 47: 15 records
+   Page 48: 15 records
+   Page 49: 15 records
+   Page 50: 15 records
+   Page 51: 15 records
+   Page 52: 15 records
+   Page 53: 15 records
+   Page 54: 15 records
+   Page 55: 15 records
+   Page 56: 15 records
+   Page 57: 15 records
+   Page 58: 15 records
+   Page 59: 15 records
+   Page 60: 15 records
+   Page 61: 15 records
+   Page 62: 15 records
+   Page 63: 15 records
+   Page 64: 15 records
+   Page 65: 15 records
+   Page 66: 15 records
+   Page 67: 15 records
+   Page 68: 15 records
+   Page 69: 15 records
+   Page 70: 15 records
+   Page 71: 15 records
+   Page 72: 15 records
+   Page 73: 15 records
+   Page 74: 15 records
+   Page 75: 15 records
+   Page 76: 15 records
+   Page 77: 15 records
+   Page 78: 15 records
+   Page 79: 15 records
+   Page 80: 15 records
+   Page 81: 15 records
+   Page 82: 15 records
+   Page 83: 15 records
+   Page 84: 15 records
+   Page 85: 15 records
+   Page 86: 15 records
+   Page 87: 15 records
+   Page 88: 15 records
+   Page 89: 15 records
+   Page 90: 15 records
+   Page 91: 15 records
+   Page 92: 15 records
+   Page 93: 15 records
+   Page 94: 15 records
+   Page 95: 15 records
+   Page 96: 15 records
+   Page 97: 15 records
+   Page 98: 15 records
+   Page 99: 15 records
+   Page 100: 15 records
+   Page 101: 15 records
+   Page 102: 15 records
+   Page 103: 15 records
+   Page 104: 15 records
+   Page 105: 15 records
+   Page 106: 15 records
+   Page 107: 15 records
+   Page 108: 15 records
+   Page 109: 15 records
+   Page 110: 12 records
+Traceback (most recent call last):
+  File "C:\Users\akuci\OneDrive\Documents\racebeautycenter\compare_settlement_fixed.py", line 126, in fetch_api_data
+    print(f"   \u2705 Total {len(endpoint_data)} transaksi perawatan\n")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\akuci\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 3: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\akuci\OneDrive\Documents\racebeautycenter\compare_settlement_fixed.py", line 310, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\akuci\OneDrive\Documents\racebeautycenter\compare_settlement_fixed.py", line 304, in main
+    api_data = fetch_api_data(year=2025, month=12)
+  File "C:\Users\akuci\OneDrive\Documents\racebeautycenter\compare_settlement_fixed.py", line 132, in fetch_api_data
+    print(f"\u274c Error dengan endpoint {endpoint}: {e}\n")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\akuci\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u274c' in position 0: character maps to <undefined>
