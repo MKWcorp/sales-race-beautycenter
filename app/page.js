@@ -17,23 +17,38 @@ const PIC_DATA = {
   "Beauty Center Wates": "TBD", "Wates": "TBD",
 };
 
-// Target Bulanan DESEMBER 2025 - Beauty Center Only
-const MONTHLY_TARGETS = {
-  "Beauty Center Kaliurang": 59100000, "Kaliurang": 59100000,
-  "Beauty Center Parangtritis": 71250000, "Parangtritis": 71250000,
-  "Beauty Center Godean": 69000000, "Godean": 69000000,
-  "Beauty Center Kotagede": 64350000, "Kota gede": 64350000,
-  "Beauty Center Prambanan": 59100000, "Prambanan": 59100000,
-  "Beauty Center Bantul": 69000000, "bantul": 69000000,
-  "Beauty Center Maguwoharjo": 71250000, "Maguwoharjo tajem": 71250000,
-  "Rumah Cantik Rajawali": 24750000, "Rumah cantik Rajawali": 24750000,
-  "Beauty Center Muntilan": 57300000, "Muntilan": 57300000,
-  "Beauty Center Wates": 59100000, "Wates": 59100000,
+// Target Bulanan 2026 - Beauty Center Only (per bulan)
+// Format: [Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec]
+const MONTHLY_TARGETS_2026 = {
+  "Rajawali": [38557179, 28917884, 48196474, 38557179, 40967003, 38557179, 40967003, 38557179, 43376827, 33737532, 43376827, 48196474],
+  "Parangtritis": [44212232, 33159174, 55265290, 44212232, 46975497, 44212232, 46975497, 44212232, 49738761, 38685703, 49738761, 55265290],
+  "Kaliurang": [39585371, 29689028, 49481713, 39585371, 42059456, 39585371, 42059456, 39585371, 44533542, 34637199, 44533542, 49481713],
+  "Tajem": [55522338, 41641754, 69402923, 55522338, 58992484, 55522338, 58992484, 55522338, 62462630, 48582046, 62462630, 69402923],
+  "Kotagede": [41127658, 30845743, 51409572, 41127658, 43698136, 41127658, 43698136, 41127658, 46268615, 35986701, 46268615, 51409572],
+  "Prambanan": [62205583, 46654187, 77756978, 62205583, 66093431, 62205583, 66093431, 62205583, 69981280, 54429885, 69981280, 77756978],
+  "Wates": [86368082, 64776061, 107960102, 86368082, 91766087, 86368082, 91766087, 86368082, 97164092, 75572071, 97164092, 107960102],
+  "Godean": [51409572, 38557179, 64261965, 51409572, 54622671, 51409572, 54622671, 51409572, 57835769, 44983376, 57835769, 64261965],
+  "Bantul": [55008242, 41256182, 68760303, 55008242, 58446258, 55008242, 58446258, 55008242, 61884273, 48132212, 61884273, 68760303],
+  "Muntilan": [40099466, 30074600, 50124333, 40099466, 42605683, 40099466, 42605683, 40099466, 45111900, 35087033, 45111900, 50124333],
 };
 
-const PROGRAM_END = new Date('2026-03-01');
-// Desember 2025 = 31 hari
-const DAYS_IN_DECEMBER = 31;
+// Mapping nama cabang ke key target
+const TARGET_KEY_MAPPING = {
+  "Beauty Center Kaliurang": "Kaliurang", "Kaliurang": "Kaliurang",
+  "Beauty Center Parangtritis": "Parangtritis", "Parangtritis": "Parangtritis",
+  "Beauty Center Godean": "Godean", "Godean": "Godean",
+  "Beauty Center Kotagede": "Kotagede", "Kota gede": "Kotagede",
+  "Beauty Center Prambanan": "Prambanan", "Prambanan": "Prambanan",
+  "Beauty Center Bantul": "Bantul", "bantul": "Bantul",
+  "Beauty Center Maguwoharjo": "Tajem", "Maguwoharjo tajem": "Tajem",
+  "Rumah Cantik Rajawali": "Rajawali", "Rumah cantik Rajawali": "Rajawali",
+  "Beauty Center Muntilan": "Muntilan", "Muntilan": "Muntilan",
+  "Beauty Center Wates": "Wates", "Wates": "Wates",
+};
+
+const PROGRAM_END = new Date('2027-01-01');
+// Fungsi untuk mendapatkan jumlah hari dalam bulan
+const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
 
 // Name mapping dari API ke Display Name
 const NAME_MAPPING = {
@@ -48,15 +63,23 @@ const NAME_MAPPING = {
 
 const getDisplayName = (name) => NAME_MAPPING[name] || name;
 const getNormalizedName = (name) => NAME_MAPPING[name] || name;
-const getDailyTarget = (name) => {
-  const normalizedName = getNormalizedName(name);
-  return Math.round((MONTHLY_TARGETS[normalizedName] || 50000000) / DAYS_IN_DECEMBER);
-};
-const getWeeklyTarget = (name) => getDailyTarget(name) * 7;
+const getTargetKey = (name) => TARGET_KEY_MAPPING[getNormalizedName(name)] || TARGET_KEY_MAPPING[name] || name;
+
 const getMonthlyTarget = (name) => {
-  const normalizedName = getNormalizedName(name);
-  return MONTHLY_TARGETS[normalizedName] || 50000000;
+  const targetKey = getTargetKey(name);
+  const now = new Date();
+  const month = now.getMonth(); // 0-11
+  const targets = MONTHLY_TARGETS_2026[targetKey];
+  return targets ? targets[month] : 50000000;
 };
+
+const getDailyTarget = (name) => {
+  const now = new Date();
+  const daysInMonth = getDaysInMonth(now.getFullYear(), now.getMonth());
+  return Math.round(getMonthlyTarget(name) / daysInMonth);
+};
+
+const getWeeklyTarget = (name) => getDailyTarget(name) * 7;
 const getPIC = (name) => {
   const normalizedName = getNormalizedName(name);
   return PIC_DATA[normalizedName] || "TBD";
@@ -254,10 +277,13 @@ function Dashboard() {
   const [totalClinics, setTotalClinics] = useState(0);
   
   // Date/Period selectors
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]); // For daily
+  // Default tanggal 1 bulan ini untuk daily filter
+  const now = new Date();
+  const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const [selectedDate, setSelectedDate] = useState(firstDayOfMonth.toISOString().split('T')[0]); // For daily
   const [selectedWeek, setSelectedWeek] = useState(1); // Week 1-4
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // 1-12
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // 2022-current
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1); // 1-12
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear()); // 2022-2026
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -485,7 +511,7 @@ function Dashboard() {
                 onChange={(e) => setSelectedYear(parseInt(e.target.value))}
                 className="px-1.5 py-0.5 rounded bg-slate-700/50 text-white text-[9px] border border-slate-600 focus:border-purple-500 focus:outline-none"
               >
-                {[2022, 2023, 2024, 2025].map(year => (
+                {[2022, 2023, 2024, 2025, 2026].map(year => (
                   <option key={year} value={year}>{year}</option>
                 ))}
               </select>
@@ -518,7 +544,7 @@ function Dashboard() {
                 onChange={(e) => setSelectedYear(parseInt(e.target.value))}
                 className="px-1.5 py-0.5 rounded bg-slate-700/50 text-white text-[9px] border border-slate-600 focus:border-green-500 focus:outline-none"
               >
-                {[2022, 2023, 2024, 2025].map(year => (
+                {[2022, 2023, 2024, 2025, 2026].map(year => (
                   <option key={year} value={year}>{year}</option>
                 ))}
               </select>
@@ -533,7 +559,7 @@ function Dashboard() {
                 onChange={(e) => setSelectedYear(parseInt(e.target.value))}
                 className="px-1.5 py-0.5 rounded bg-slate-700/50 text-white text-[9px] border border-slate-600 focus:border-amber-500 focus:outline-none"
               >
-                {[2022, 2023, 2024, 2025].map(year => (
+                {[2022, 2023, 2024, 2025, 2026].map(year => (
                   <option key={year} value={year}>{year}</option>
                 ))}
               </select>

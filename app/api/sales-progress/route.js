@@ -167,17 +167,17 @@ export async function GET(request) {
             const targetMonth = month ? parseInt(month) - 1 : new Date().getMonth();
             const weekNum = week ? parseInt(week) : 1;
             
-            const firstDay = new Date(targetYear, targetMonth, 1);
-            const firstMonday = new Date(firstDay);
-            const dayOfWeek = firstDay.getDay();
-            const daysUntilMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek) % 7;
-            firstMonday.setDate(firstDay.getDate() + daysUntilMonday);
+            // Minggu 1 selalu mulai dari tanggal 1 bulan tersebut
+            // Minggu berikutnya dihitung per 7 hari
+            const firstDayOfMonth = new Date(targetYear, targetMonth, 1);
+            const lastDayOfMonth = new Date(targetYear, targetMonth + 1, 0);
             
-            const startOfWeek = new Date(firstMonday);
-            startOfWeek.setDate(firstMonday.getDate() + (weekNum - 1) * 7);
+            // Hitung start dan end berdasarkan nomor minggu
+            const startDay = 1 + (weekNum - 1) * 7;
+            const endDay = Math.min(startDay + 6, lastDayOfMonth.getDate());
             
-            const endOfWeek = new Date(startOfWeek);
-            endOfWeek.setDate(startOfWeek.getDate() + 6);
+            const startOfWeek = new Date(targetYear, targetMonth, startDay);
+            const endOfWeek = new Date(targetYear, targetMonth, endDay);
             
             startDateStr = getWIBDateStr(startOfWeek);
             endDateStr = getWIBDateStr(endOfWeek);
