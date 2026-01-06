@@ -10,15 +10,16 @@
     "generate-icons": "node generate-icons.js"
   },
   "dependencies": {
+    "glob": "^13.0.0",
     "lucide-react": "^0.294.0",
-    "next": "^14.0.4",
+    "next": "^14.2.35",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.16",
     "eslint": "^8.56.0",
-    "eslint-config-next": "^14.0.4",
+    "eslint-config-next": "^16.1.1",
     "postcss": "^8.4.32",
     "sharp": "^0.34.5",
     "tailwindcss": "^3.4.0"
