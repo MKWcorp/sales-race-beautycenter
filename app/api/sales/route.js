@@ -19,7 +19,8 @@ const cache = {
   daily: { data: null, timestamp: null, promise: null },
   weekly: { data: null, timestamp: null, promise: null },
   monthly: { data: null, timestamp: null, promise: null },
-  yearly: { data: null, timestamp: null, promise: null }
+  yearly: { data: null, timestamp: null, promise: null },
+  ytd: { data: null, timestamp: null, promise: null }
 };
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
 
@@ -307,6 +308,17 @@ async function fetchLeaderboardData(filter = 'daily', params = {}) {
         startDateStr = getWIBDateStr(startOfYear);
         endDateStr = getWIBDateStr(endOfYear);
         break;
+        
+      case 'ytd':
+        // Year to Date: from January 1st to today
+        const ytdYear = year ? parseInt(year) : new Date().getFullYear();
+        const startOfYTD = new Date(ytdYear, 0, 1); // January 1st
+        const todayYTD = new Date();
+        
+        startDateStr = getWIBDateStr(startOfYTD);
+        endDateStr = getWIBDateStr(todayYTD);
+        break;
+        
       default:
         startDateStr = todayStr;
         endDateStr = todayStr;

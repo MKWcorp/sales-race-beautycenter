@@ -203,6 +203,17 @@ export async function GET(request) {
             startDateStr = getWIBDateStr(startOfYear);
             endDateStr = getWIBDateStr(endOfYear);
             break;
+            
+          case 'ytd':
+            // Year to Date: from January 1st to today
+            const ytdYear = year ? parseInt(year) : new Date().getFullYear();
+            const startOfYTD = new Date(ytdYear, 0, 1); // January 1st
+            const todayYTD = new Date();
+            
+            startDateStr = getWIBDateStr(startOfYTD);
+            endDateStr = getWIBDateStr(todayYTD);
+            break;
+            
           default:
             const today = new Date();
             startDateStr = getWIBDateStr(today);

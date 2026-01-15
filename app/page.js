@@ -80,6 +80,24 @@ const getDailyTarget = (name) => {
 };
 
 const getWeeklyTarget = (name) => getDailyTarget(name) * 7;
+
+const getYTDTarget = (name) => {
+  // Year to Date: hitung target proporsional dari 1 Januari sampai hari ini
+  const targetKey = getTargetKey(name);
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth(); // 0-11
+  const dayOfYear = Math.floor((now - new Date(year, 0, 1)) / (1000 * 60 * 60 * 24)) + 1;
+  const daysInYear = Math.floor((new Date(year, 11, 31) - new Date(year, 0, 1)) / (1000 * 60 * 60 * 24)) + 1;
+  
+  // Total target tahunan (jumlah semua target bulanan)
+  const targets = MONTHLY_TARGETS_2026[targetKey];
+  const yearlyTarget = targets ? targets.reduce((sum, t) => sum + t, 0) : 50000000 * 12;
+  
+  // Target proporsional berdasarkan hari yang sudah lewat
+  return Math.round((yearlyTarget / daysInYear) * dayOfYear);
+};
+
 const getPIC = (name) => {
   const normalizedName = getNormalizedName(name);
   return PIC_DATA[normalizedName] || "TBD";
@@ -104,12 +122,14 @@ const RaceRow = ({ rank, data, filter }) => {
   const target = getDailyTarget(data.name);
   const weeklyTarget = getWeeklyTarget(data.name);
   const monthlyTarget = getMonthlyTarget(data.name);
+  const ytdTarget = getYTDTarget(data.name);
   
   // Get target based on filter
   let currentTarget = target;
   if (filter === 'weekly') currentTarget = weeklyTarget;
   else if (filter === 'monthly') currentTarget = monthlyTarget;
   else if (filter === 'yearly') currentTarget = monthlyTarget * 12; // Approximate yearly target
+  else if (filter === 'ytd') currentTarget = ytdTarget;
   
   // Calculate achievement
   const achievement = currentTarget > 0 ? Math.round((data.total / currentTarget) * 100) : 0;
@@ -228,6 +248,7 @@ const RaceRow = ({ rank, data, filter }) => {
               {filter === 'weekly' && 'MINGGU INI'}
               {filter === 'monthly' && 'BULAN INI'}
               {filter === 'yearly' && 'TAHUN INI'}
+              {filter === 'ytd' && 'YTD (JAN-SEKARANG)'}
             </span>
           </div>
 
@@ -239,6 +260,7 @@ const RaceRow = ({ rank, data, filter }) => {
                 {filter === 'weekly' && 'Mingguan:'}
                 {filter === 'monthly' && 'Bulanan:'}
                 {filter === 'yearly' && 'Tahunan:'}
+                {filter === 'ytd' && 'YTD:'}
               </span>
               <div className={`px-3 py-1 rounded text-sm md:text-base font-black shadow-md
                 ${achievement >= 80 ? 'bg-gradient-to-r from-green-500 to-green-600 text-white' : 
@@ -269,7 +291,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(new Date());
-  const [filter, setFilter] = useState('daily'); // daily, weekly, monthly, yearly
+  const [filter, setFilter] = useState('daily'); // daily, weekly, monthly, yearly, ytd
   
   // Loading progress
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -302,6 +324,8 @@ function Dashboard() {
       } else if (filter === 'monthly') {
         url += `&month=${selectedMonth}&year=${selectedYear}`;
       } else if (filter === 'yearly') {
+        url += `&year=${selectedYear}`;
+      } else if (filter === 'ytd') {
         url += `&year=${selectedYear}`;
       }
       
@@ -360,11 +384,13 @@ function Dashboard() {
       const targetA = filter === 'daily' ? getDailyTarget(a.name) :
                       filter === 'weekly' ? getWeeklyTarget(a.name) :
                       filter === 'monthly' ? getMonthlyTarget(a.name) :
+                      filter === 'ytd' ? getYTDTarget(a.name) :
                       getMonthlyTarget(a.name) * 12; // yearly
       
       const targetB = filter === 'daily' ? getDailyTarget(b.name) :
                       filter === 'weekly' ? getWeeklyTarget(b.name) :
                       filter === 'monthly' ? getMonthlyTarget(b.name) :
+                      filter === 'ytd' ? getYTDTarget(b.name) :
                       getMonthlyTarget(b.name) * 12; // tahunan
       
       // Hitung persentase pencapaian
@@ -383,6 +409,7 @@ function Dashboard() {
     const target = filter === 'daily' ? getDailyTarget(c.name) :
                    filter === 'weekly' ? getWeeklyTarget(c.name) :
                    filter === 'monthly' ? getMonthlyTarget(c.name) :
+                   filter === 'ytd' ? getYTDTarget(c.name) :
                    getMonthlyTarget(c.name) * 12; // yearly
     const achievement = target > 0 ? Math.round((c.total / target) * 100) : 0;
     return achievement >= 80;
@@ -458,6 +485,16 @@ function Dashboard() {
             }`}
           >
             TAHUNAN
+          </button>
+          <button
+            onClick={() => setFilter('ytd')}
+            className={`px-2 py-0.5 rounded text-[9px] md:text-[10px] font-bold transition-all ${
+              filter === 'ytd' 
+                ? 'bg-gradient-to-r from-cyan-500 to-teal-600 text-white shadow-lg shadow-cyan-500/50' 
+                : 'bg-slate-700/50 text-slate-400 hover:bg-slate-600/50'
+            }`}
+          >
+            YTD
           </button>
         </div>
 
@@ -565,6 +602,21 @@ function Dashboard() {
               </select>
             </>
           )}
+          
+          {filter === 'ytd' && (
+            <>
+              <span className="text-[9px] text-slate-400">Tahun:</span>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                className="px-1.5 py-0.5 rounded bg-slate-700/50 text-white text-[9px] border border-slate-600 focus:border-cyan-500 focus:outline-none"
+              >
+                {[2022, 2023, 2024, 2025, 2026].map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+            </>
+          )}
         </div>
 
         {/* Stats - Inline */}
@@ -581,12 +633,14 @@ function Dashboard() {
               filter === 'daily' ? 'bg-blue-500/20 border-blue-500/50' :
               filter === 'weekly' ? 'bg-purple-500/20 border-purple-500/50' :
               filter === 'monthly' ? 'bg-green-500/20 border-green-500/50' :
+              filter === 'ytd' ? 'bg-cyan-500/20 border-cyan-500/50' :
               'bg-amber-500/20 border-amber-500/50'
             }`}>
               <span className={`font-bold ${
                 filter === 'daily' ? 'text-blue-300' :
                 filter === 'weekly' ? 'text-purple-300' :
                 filter === 'monthly' ? 'text-green-300' :
+                filter === 'ytd' ? 'text-cyan-300' :
                 'text-amber-300'
               }`}>
                 Rp {formatRupiah(totalRevenue)}
